@@ -1,7 +1,5 @@
 # Project
 
-This is just a template I use when making full stack web apps. It is React, Node, postgres, and Docker.
-
 \
 Install prettier vsc extension for formatting:
 
@@ -66,7 +64,3 @@ run js code on prod
 ```
 npm start
 ```
-
-# TODO
-
-add .env to gitignore and replace the variables in .env with the real ones
