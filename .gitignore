@@ -10,4 +10,3 @@ backend/node_modules/
 .env 
 frontend/dist/
 backend/dist/
-backend/package-lock.json
