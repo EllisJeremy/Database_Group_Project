@@ -5,15 +5,15 @@ import { Request, Response, Router } from "express";
 const router = Router();
 
 router.post("/", async (req: Request, res: Response) => {
-  const { email, password, user } = req.body;
+  const { email, password, name } = req.body;
 
   try {
     const obfuscatedPassword = await bcrypt.hash(password, 10);
 
     await pool.query(
-      `INSERT INTO accounts (email, password_hash, user)
+      `INSERT INTO accounts (email, password_hash, name)
        VALUES ($1, $2, $3)`,
-      [email, obfuscatedPassword, user],
+      [email, obfuscatedPassword, name],
     );
 
     res.status(201).json({ success: true });
