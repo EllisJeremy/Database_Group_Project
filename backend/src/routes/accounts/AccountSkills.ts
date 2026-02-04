@@ -50,7 +50,7 @@ router.post("/add", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.post("/remove", requireAuth, async (req: Request, res: Response) => {
+router.post("/delete", requireAuth, async (req: Request, res: Response) => {
   const id = req.user.id;
   const { skillIds } = req.body;
 
@@ -66,8 +66,8 @@ router.post("/remove", requireAuth, async (req: Request, res: Response) => {
     ]);
     res.json({ success: true });
   } catch (e) {
-    console.error("cant remove skill", e);
-    res.status(500).json({ error: "Failed to remove skillIds" });
+    console.error("cant delete skill", e);
+    res.status(500).json({ error: "Failed to delete skillIds" });
   }
 });
 

@@ -3,6 +3,16 @@ import { pool } from "../../setup/pool";
 
 const router = Router();
 
+router.get("", async (_req: Request, res: Response) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM skills`);
+    res.json({ success: true, skills: rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to get skills" });
+  }
+});
+
 router.post("/add", async (req: Request, res: Response) => {
   const { name, type } = req.body;
 
@@ -32,16 +42,6 @@ router.post("/add", async (req: Request, res: Response) => {
     }
 
     res.status(500).json({ error: "Failed to add skill" });
-  }
-});
-
-router.get("", async (_req: Request, res: Response) => {
-  try {
-    const { rows } = await pool.query(`SELECT * FROM skills`);
-    res.json({ success: true, skills: rows });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to get skills" });
   }
 });
 

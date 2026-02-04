@@ -5,7 +5,7 @@ VALUES
   ('bob@icloud.com', 'Hash3', 'bob');
 
 INSERT INTO skills (name, type) VALUES
--- Languages
+-- language
 ('python', 'language'),
 ('java', 'language'),
 ('c', 'language'),

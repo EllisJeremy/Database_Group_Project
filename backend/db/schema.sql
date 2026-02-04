@@ -47,3 +47,5 @@ CREATE TABLE posts (
   filled_slots INT NOT NULL
 );
 
+
+
