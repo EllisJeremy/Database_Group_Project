@@ -7,9 +7,19 @@ CREATE TABLE accounts (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TYPE skill_type AS ENUM (
+  'language',
+  'database',
+  'framework or library',
+  'cloud',
+  'tool',
+  'other'
+);
+
 CREATE TABLE skills (
   id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE
+  name TEXT NOT NULL UNIQUE,
+  type skill_type NOT NULL
 );
 
 CREATE TABLE account_skills (

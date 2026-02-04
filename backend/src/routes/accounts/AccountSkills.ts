@@ -5,16 +5,35 @@ import format from "pg-format";
 
 const router = Router();
 
+router.get("/", requireAuth, async (req: Request, res: Response) => {
+  const id = req.user.id;
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT s.id, s.name, s.type
+    FROM account_skills a_s
+    JOIN skills s
+    ON a_s.skill_id = s.id
+    WHERE a_s.account_id = $1`,
+      [id],
+    );
+
+    res.json({ skills: rows });
+  } catch (error) {}
+});
+
 router.post("/add", requireAuth, async (req: Request, res: Response) => {
   const id = req.user.id;
-  const { skills } = req.body;
+  const { skillIds } = req.body;
 
-  if (!Array.isArray(skills) || skills.length === 0) {
-    res.status(400).json({ error: "Skills must be a non-empty array" });
+  if (!Array.isArray(skillIds) || skillIds.length === 0) {
+    res
+      .status(400)
+      .json({ error: "Skills must be a non-empty array. What you passed: skillIds:", skillIds });
     return;
   }
 
-  const values = skills.map((skill: number) => [id, skill]);
+  const values = skillIds.map((skill: number) => [id, skill]);
 
   try {
     await pool.query(format("INSERT INTO account_skills (account_id, skill_id) VALUES %L", values));
@@ -27,15 +46,15 @@ router.post("/add", requireAuth, async (req: Request, res: Response) => {
       return;
     }
 
-    res.status(500).json({ error: "Failed to add skills" });
+    res.status(500).json({ error: "Failed to add skillIds" });
   }
 });
 
 router.post("/remove", requireAuth, async (req: Request, res: Response) => {
   const id = req.user.id;
-  const { skills } = req.body;
+  const { skillIds } = req.body;
 
-  if (!Array.isArray(skills) || skills.length === 0) {
+  if (!Array.isArray(skillIds) || skillIds.length === 0) {
     res.status(400).json({ error: "Skills must be a non-empty array" });
     return;
   }
@@ -43,12 +62,12 @@ router.post("/remove", requireAuth, async (req: Request, res: Response) => {
   try {
     await pool.query("DELETE FROM account_skills WHERE account_id = $1 AND skill_id = ANY($2)", [
       id,
-      skills,
+      skillIds,
     ]);
     res.json({ success: true });
   } catch (e) {
     console.error("cant remove skill", e);
-    res.status(500).json({ error: "Failed to remove skills" });
+    res.status(500).json({ error: "Failed to remove skillIds" });
   }
 });
 
