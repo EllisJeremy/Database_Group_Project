@@ -10,7 +10,7 @@ CREATE TABLE accounts (
 CREATE TYPE skill_type AS ENUM (
   'language',
   'database',
-  'framework or library',
+  'framework_or_library',
   'cloud',
   'tool',
   'other'

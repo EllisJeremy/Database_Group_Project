@@ -18,7 +18,7 @@ router.get("/", requireAuth, async (req: Request, res: Response) => {
       [id],
     );
 
-    res.json({ skills: rows });
+    res.json({ success: true, skills: rows });
   } catch (error) {}
 });
 

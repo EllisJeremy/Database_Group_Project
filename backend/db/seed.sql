@@ -20,16 +20,16 @@ INSERT INTO skills (name, type) VALUES
 ('swift', 'language'),
 ('kotlin', 'language'),
 
--- framework or library
-('react', 'framework or library'),
-('next.js', 'framework or library'),
-('vue', 'framework or library'),
-('angular', 'framework or library'),
-('express', 'framework or library'),
-('nestjs', 'framework or library'),
-('django', 'framework or library'),
-('flask', 'framework or library'),
-('spring', 'framework or library'),
+-- framework_or_library
+('react', 'framework_or_library'),
+('next.js', 'framework_or_library'),
+('vue', 'framework_or_library'),
+('angular', 'framework_or_library'),
+('express', 'framework_or_library'),
+('nestjs', 'framework_or_library'),
+('django', 'framework_or_library'),
+('flask', 'framework_or_library'),
+('spring', 'framework_or_library'),
 
 -- database
 ('postgresql', 'database'),
