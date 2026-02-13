@@ -11,3 +11,4 @@ backend/node_modules/
 frontend/dist/
 backend/dist/
 /.vscode
+Database.session.sql
