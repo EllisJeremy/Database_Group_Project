@@ -30,6 +30,12 @@ You must install the Docker desktop app
 
 ## local:
 
+to get an env
+
+```
+npm run env
+```
+
 To install dependencies
 
 ```
