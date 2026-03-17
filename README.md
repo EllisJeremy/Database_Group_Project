@@ -32,10 +32,6 @@ You must install the Docker desktop app
 
 to get an env
 
-```
-npm run env
-```
-
 To install dependencies
 
 ```
@@ -43,30 +39,14 @@ npm ci
 ```
 
 \
+
+```
+npm run env
+```
+
+\
 Run node and postgres locally
 
 ```
 npm run docker
-```
-
-## prod:
-
-Compile TypeScript to JavaScript:
-
-```
-npm run build
-```
-
-\
-Turn files into zip
-
-```
-npm run zip
-```
-
-\
-run js code on prod
-
-```
-npm start
 ```
