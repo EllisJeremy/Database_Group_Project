@@ -48,21 +48,21 @@ CREATE TABLE posts (
 );
 
 CREATE TABLE groups (
-    group_id        SERIAL PRIMARY KEY,
-    class_id        INTEGER NOT NULL,
-    group_name      VARCHAR(100) NOT NULL,
-    max_members     INTEGER NOT NULL CHECK (max_members > 0),
-    created_by      INTEGER NOT NULL,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id SERIAL PRIMARY KEY,
+    class_id INTEGER NOT NULL,
+    group_name VARCHAR(100) NOT NULL,
+    max_members INTEGER NOT NULL CHECK (max_members > 0),
+    created_by INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_groups_class
         FOREIGN KEY (class_id)
-        REFERENCES classes(class_id)
+        REFERENCES classes(id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_groups_created_by
         FOREIGN KEY (created_by)
-        REFERENCES accounts(account_id)
+        REFERENCES accounts(id)
         ON DELETE CASCADE
 );
 
@@ -75,14 +75,11 @@ CREATE TABLE account_groups (
 
     CONSTRAINT fk_account_groups_account
         FOREIGN KEY (account_id)
-        REFERENCES accounts(account_id)
+        REFERENCES accounts(id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_account_groups_group
         FOREIGN KEY (group_id)
-        REFERENCES groups(group_id)
+        REFERENCES groups(id)
         ON DELETE CASCADE
 );
-
-
-
