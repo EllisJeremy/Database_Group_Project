@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:18
-    container_name: example_name
+    container_name: group_finder_db
     restart: always
     environment:
       POSTGRES_USER: ${DATABASE_USER}
@@ -16,7 +16,7 @@ services:
 
   backend:
     build: .
-    container_name: example_name_backend
+    container_name: group_finder_backend
     restart: always
     depends_on:
       - db

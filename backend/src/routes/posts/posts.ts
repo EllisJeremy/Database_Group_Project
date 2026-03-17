@@ -38,7 +38,7 @@ router.get("", async (req: Request, res: Response) => {
 
 router.post("/add", requireAuth, async (req: Request, res: Response) => {
   const authorId = req.user.id;
-  const { class_id, title, description, total_slots, filled_slots } = req.body;
+  const { class_id, title, description } = req.body;
 
   try {
     const classCheck = await pool.query(`SELECT id FROM classes WHERE id = $1`, [class_id]);
@@ -49,10 +49,10 @@ router.post("/add", requireAuth, async (req: Request, res: Response) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO posts (class_id, author_id, title, description, total_slots, filled_slots)
+      `INSERT INTO posts (class_id, author_id, title, description)
        VALUES ($1, $2, $3, $4, $5, )
        RETURNING *`,
-      [class_id, authorId, title, description, total_slots, filled_slots],
+      [class_id, authorId, title, description],
     );
 
     res.json({

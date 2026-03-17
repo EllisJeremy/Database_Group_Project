@@ -42,9 +42,7 @@ CREATE TABLE posts (
   author_id INT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW(),
-  total_slots INT NOT NULL,
-  filled_slots INT NOT NULL
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE groups (

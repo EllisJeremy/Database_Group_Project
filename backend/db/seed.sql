@@ -80,13 +80,13 @@ INSERT INTO classes (name, section, creator_id) VALUES
   ('Operating Systems', '003', 1),
   ('Software Engineering', '002', 4);
 
-INSERT INTO posts (class_id, author_id, title, description, total_slots, filled_slots) VALUES
-  (1, 1, 'Looking for DB project partners', 'Need 2 people for the final project', 3, 1),
-  (1, 2, 'Study group for midterm', 'Reviewing indexing and transactions', 4, 2),
-  (2, 3, 'React frontend partner needed', 'Building a full stack app', 2, 1),
-  (3, 4, 'Algorithm study group', 'Covering dynamic programming this week', 5, 3),
-  (4, 5, 'OS project group', 'Working on the scheduler project', 3, 1),
-  (5, 2, 'SE team forming', 'Looking for members for agile project', 4, 0);
+INSERT INTO posts (class_id, author_id, title, description) VALUES
+  (1, 1, 'Looking for DB project partners', 'Need 2 people for the final project'),
+  (1, 2, 'Study group for midterm', 'Reviewing indexing and transactions'),
+  (2, 3, 'React frontend partner needed', 'Building a full stack app'),
+  (3, 4, 'Algorithm study group', 'Covering dynamic programming this week'),
+  (4, 5, 'OS project group', 'Working on the scheduler project'),
+  (5, 2, 'SE team forming', 'Looking for members for agile project');
 
 INSERT INTO groups (class_id, group_name, max_members, created_by) VALUES
   (1, 'DB Heroes', 4, 1),
