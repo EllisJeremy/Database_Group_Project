@@ -11,11 +11,7 @@ import posts from "./routes/posts/posts.js";
 
 const port = process.env.PORT || 8080;
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://beyondsunday.org",
-  "https://theorchardchurch.net/",
-];
+const allowedOrigins = ["http://localhost:5173"];
 
 app.use(
   cors({
