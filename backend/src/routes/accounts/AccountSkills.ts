@@ -42,8 +42,11 @@ router.post("/add", requireAuth, async (req: Request, res: Response) => {
   } catch (e: any) {
     console.error("cant add skill", e);
 
-    if (e.code === "23503") {
+    if (e.code === "23503" || e.code === "2203") {
       res.status(400).json({ error: "Invalid skill ID" });
+      return;
+    } else if (e.code === "23505") {
+      res.status(409).json({ error: "One or more skill Ids are already applied" });
       return;
     }
 
