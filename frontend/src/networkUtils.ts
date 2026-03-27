@@ -50,3 +50,5 @@ export const login = (email: string, password: string) =>
   api.post<AuthResponse>("accounts/login", { email, password });
 
 export const loginMe = () => api.get<AuthResponse>("accounts/login/me");
+
+export const getUserSkills = () => api.get("accounts/skills");
