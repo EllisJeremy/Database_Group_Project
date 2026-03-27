@@ -11,10 +11,11 @@ router.get("/", requireAuth, async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(
       `SELECT s.id, s.name, s.type
-    FROM account_skills a_s
-    JOIN skills s
-    ON a_s.skill_id = s.id
-    WHERE a_s.account_id = $1`,
+      FROM account_skills a_s
+      JOIN skills s
+      ON a_s.skill_id = s.id
+      WHERE a_s.account_id = $1
+      `,
       [id],
     );
 

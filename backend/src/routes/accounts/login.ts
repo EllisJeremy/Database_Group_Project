@@ -23,6 +23,7 @@ router.post("", async (req: Request, res: Response) => {
       [email],
     );
 
+    // use a fake hash to that logins always take the same amount of time regardless
     const backUpHash = "$2b$10$stn5DE/DAtvWOGMw4xywfuauxmtsbD7wyXP9/1oEitpFbGinvalid";
 
     const hash = account?.password_hash ?? backUpHash;
