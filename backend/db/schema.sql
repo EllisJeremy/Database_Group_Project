@@ -3,6 +3,7 @@ CREATE TABLE accounts (
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     name TEXT NOT NULL,
+    is_admin BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW()
 );
 

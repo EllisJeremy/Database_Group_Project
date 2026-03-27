@@ -12,9 +12,7 @@ router.post("", async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
-    const {
-      rows: [account],
-    } = await pool.query(
+    const { rows } = await pool.query(
       `
       SELECT id, email, password_hash, name
       FROM accounts
@@ -22,6 +20,7 @@ router.post("", async (req: Request, res: Response) => {
       `,
       [email],
     );
+    const account = rows[0];
 
     // use a fake hash to that logins always take the same amount of time regardless
     const backUpHash = "$2b$10$stn5DE/DAtvWOGMw4xywfuauxmtsbD7wyXP9/1oEitpFbGinvalid";
@@ -41,6 +40,7 @@ router.post("", async (req: Request, res: Response) => {
       id: account.id,
       email: account.email,
       name: account.name,
+      isAdmin: account.is_admin,
     };
 
     const token = jwt.sign(user, env.JWT_SECRET, { expiresIn: "7d" });

@@ -12,11 +12,14 @@ import {
   Text,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { createUser } from "../networkUtils";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../state/useAuthStore";
 
 type Tab = "login" | "signup" | "forgot";
 
 export default function Account() {
+  const { signup, login } = useAuthStore();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("login");
 
   const loginForm = useForm({
@@ -82,7 +85,7 @@ export default function Account() {
           </Tabs>
 
           {tab === "login" ? (
-            <form onSubmit={loginForm.onSubmit((values) => console.log(values))}>
+            <form onSubmit={loginForm.onSubmit(async (values) => { await login(values.email, values.password); navigate("/"); })}>
               <Stack>
                 <TextInput
                   label="Email"
@@ -107,7 +110,7 @@ export default function Account() {
           ) : (
             <form
               onSubmit={signupForm.onSubmit(
-                async (values) => await createUser(values.email, values.password, values.name),
+                async (values) => { await signup(values.email, values.password, values.name); navigate("/"); },
               )}
             >
               <Stack>

@@ -1,11 +1,11 @@
-import { useExampleStore } from "../state/useExampleStore";
+import { useAuthStore } from "../state/useAuthStore";
 
 export default function Home() {
-  const { exampleNumber, setExampleNumber } = useExampleStore();
+  const { user } = useAuthStore();
   return (
     <div>
-      <p>{exampleNumber}</p>
-      <input type="text" onChange={(e) => setExampleNumber(Number(e.target.value))} />
+      <p>{user?.email ?? "no account"}</p>
+      <button onClick={() => console.log(user)}>log auth</button>
     </div>
   );
 }

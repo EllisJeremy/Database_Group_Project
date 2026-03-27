@@ -6,6 +6,7 @@ async function request<T>(path: string, method: Method, body?: unknown): Promise
   const options: RequestInit = {
     method,
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
   };
 
   if (body !== undefined) {
@@ -30,6 +31,22 @@ export const api = {
   delete: <T>(path: string) => request<T>(path, "DELETE"),
 };
 
-export async function createUser(email: string, password: string, name: string) {
-  return api.post("accounts/signup", { email, password, name });
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  isAdmin: boolean;
 }
+
+interface AuthResponse {
+  success: boolean;
+  user: User;
+}
+
+export const signup = (email: string, password: string, name: string) =>
+  api.post<AuthResponse>("accounts/signup", { email, password, name });
+
+export const login = (email: string, password: string) =>
+  api.post<AuthResponse>("accounts/login", { email, password });
+
+export const loginMe = () => api.get<AuthResponse>("accounts/login/me");
