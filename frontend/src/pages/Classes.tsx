@@ -32,7 +32,7 @@ export default function Classes() {
   const filtered = classes.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.section.toLowerCase().includes(search.toLowerCase())
+      c.section.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleCreate = async () => {
@@ -91,7 +91,6 @@ export default function Classes() {
             fontWeight: 600,
           }}
         >
-          <span style={{ fontSize: 20, fontWeight: 300 }}>+</span>
           New Class
         </button>
       </div>

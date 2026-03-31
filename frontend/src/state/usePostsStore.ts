@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import { api } from "../networkUtils";
 
+export interface PostGroup {
+  id: number;
+  group_name: string;
+  max_members: number;
+  created_by: number;
+  members: Array<{ account_id: number; name: string }>;
+}
+
 export interface Post {
   id: number;
   class_id: number;
@@ -10,13 +18,14 @@ export interface Post {
   created_at: string;
   author_name?: string;
   class_name?: string;
+  group?: PostGroup | null;
 }
 
 interface PostsState {
   posts: Post[];
   loading: boolean;
   fetchPosts: (classId?: number) => Promise<void>;
-  createPost: (classId: number, title: string, description: string) => Promise<void>;
+  createPost: (classId: number, title: string, description: string, groupName?: string, maxMembers?: number) => Promise<void>;
   updatePost: (id: number, data: { title?: string; description?: string }) => Promise<void>;
   deletePost: (id: number) => Promise<void>;
 }
@@ -38,8 +47,13 @@ export const usePostsStore = create<PostsState>((set, get) => ({
     }
   },
 
-  createPost: async (classId, title, description) => {
-    await api.post("posts/add", { class_id: classId, title, description });
+  createPost: async (classId, title, description, groupName?, maxMembers?) => {
+    await api.post("posts/add", {
+      class_id: classId,
+      title,
+      description,
+      ...(groupName ? { group_name: groupName, max_members: maxMembers ?? 4 } : {}),
+    });
     await get().fetchPosts(classId);
   },
 

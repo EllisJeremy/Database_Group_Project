@@ -74,39 +74,42 @@ INSERT INTO account_skills (account_id, skill_id) VALUES
 (7, 9);  -- frank: rust
 
 INSERT INTO classes (name, section, creator_id) VALUES
-('Database Systems', '001', 1),
-('Web Development', '002', 2),
-('Algorithms', '001', 3),
-('Operating Systems', '003', 1),
-('Software Engineering', '002', 4);
+('Database Systems', '001', 1),   -- id 1, jeremy
+('Web Development', '002', 2),    -- id 2, alice
+('Algorithms', '001', 3),         -- id 3, bob
+('Operating Systems', '003', 1),  -- id 4, jeremy
+('Software Engineering', '002', 4); -- id 5, carol
 
-INSERT INTO posts (class_id, author_id, title, description) VALUES
-(
-    1,
-    1,
-    'Looking for DB project partners',
-    'Need 2 people for the final project'
-),
-(1, 2, 'Study group for midterm', 'Reviewing indexing and transactions'),
-(2, 3, 'React frontend partner needed', 'Building a full stack app'),
-(3, 4, 'Algorithm study group', 'Covering dynamic programming this week'),
-(4, 5, 'OS project group', 'Working on the scheduler project'),
-(5, 2, 'SE team forming', 'Looking for members for agile project');
-
+-- Groups created by the same person who posts the ad
 INSERT INTO groups (class_id, group_name, max_members, created_by) VALUES
-(1, 'DB Heroes', 4, 1),
-(2, 'Web Wizards', 3, 2),
-(3, 'Algo Squad', 5, 3),
-(4, 'Kernel Panic', 4, 4),
-(5, 'Agile Avengers', 4, 5);
+(1, 'DB Heroes', 4, 1),         -- id 1, jeremy, class 1
+(1, 'DB Study Group', 3, 2),    -- id 2, alice, class 1
+(2, 'Web Wizards', 3, 3),       -- id 3, bob, class 2
+(3, 'Algo Squad', 5, 4),        -- id 4, carol, class 3
+(4, 'Kernel Panic', 4, 5),      -- id 5, dave, class 4
+(5, 'Agile Avengers', 4, 2);    -- id 6, alice, class 5
 
+-- Posts linked to their group (post is the group's ad)
+INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
+(1, 1, 1, 'Looking for DB project partners', 'Need 2 more people for the final project. We are using PostgreSQL and Python.'),
+(1, 2, 2, 'Study group for midterm', 'Reviewing indexing and transactions. Open to all levels.'),
+(2, 3, 3, 'React frontend partner needed', 'Building a full stack app with React and Express. Need 2 more.'),
+(3, 4, 4, 'Algorithm study group', 'Covering dynamic programming and graph algorithms this week.'),
+(4, 5, 5, 'OS project group', 'Working on the scheduler project. Looking for systems programmers.'),
+(5, 2, 6, 'SE team forming', 'Looking for members for agile project. Experience with Git and Scrum a plus.');
+
+-- Group members (creator auto-joined + others who joined)
 INSERT INTO account_groups (account_id, group_id) VALUES
-(1, 1),
-(2, 1),
-(3, 2),
-(4, 2),
-(5, 3),
-(6, 3),
-(7, 4),
-(1, 5),
-(2, 5);
+(1, 1), -- jeremy in DB Heroes (creator)
+(3, 1), -- bob in DB Heroes
+(2, 2), -- alice in DB Study Group (creator)
+(4, 2), -- carol in DB Study Group
+(3, 3), -- bob in Web Wizards (creator)
+(6, 3), -- eve in Web Wizards
+(4, 4), -- carol in Algo Squad (creator)
+(5, 4), -- dave in Algo Squad
+(5, 5), -- dave in Kernel Panic (creator)
+(7, 5), -- frank in Kernel Panic
+(2, 6), -- alice in Agile Avengers (creator)
+(1, 6), -- jeremy in Agile Avengers
+(3, 6); -- bob in Agile Avengers

@@ -4,7 +4,6 @@ import { useAuthStore } from "../state/useAuthStore";
 const navItems = [
   { to: "/", label: "Classes", icon: "□" },
   { to: "/skills", label: "My Skills", icon: "●" },
-  { to: "/groups", label: "Groups", icon: "♢" },
 ];
 
 export default function Layout() {

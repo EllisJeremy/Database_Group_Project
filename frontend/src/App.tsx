@@ -7,7 +7,6 @@ import Account from "./pages/Account";
 import Classes from "./pages/Classes";
 import ClassDetail from "./pages/ClassDetail";
 import Skills from "./pages/Skills";
-import Groups from "./pages/Groups";
 import { useAuthStore } from "./state/useAuthStore";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -42,7 +41,6 @@ export default function App() {
             <Route path="/" element={<Classes />} />
             <Route path="/class/:id" element={<ClassDetail />} />
             <Route path="/skills" element={<Skills />} />
-            <Route path="/groups" element={<Groups />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

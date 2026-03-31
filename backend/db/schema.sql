@@ -36,48 +36,28 @@ CREATE TABLE classes (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE groups (
+    id SERIAL PRIMARY KEY,
+    class_id INTEGER NOT NULL REFERENCES classes (id) ON DELETE CASCADE,
+    group_name VARCHAR(100) NOT NULL,
+    max_members INTEGER NOT NULL CHECK (max_members > 0),
+    created_by INTEGER NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     class_id INT NOT NULL REFERENCES classes (id) ON DELETE CASCADE,
     author_id INT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    group_id INT REFERENCES groups (id) ON DELETE SET NULL,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE groups (
-    id SERIAL PRIMARY KEY,
-    class_id INTEGER NOT NULL,
-    group_name VARCHAR(100) NOT NULL,
-    max_members INTEGER NOT NULL CHECK (max_members > 0),
-    created_by INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_groups_class
-    FOREIGN KEY (class_id)
-    REFERENCES classes (id)
-    ON DELETE CASCADE,
-
-    CONSTRAINT fk_groups_created_by
-    FOREIGN KEY (created_by)
-    REFERENCES accounts (id)
-    ON DELETE CASCADE
-);
-
 CREATE TABLE account_groups (
-    account_id INTEGER NOT NULL,
-    group_id INTEGER NOT NULL,
+    account_id INTEGER NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    group_id INTEGER NOT NULL REFERENCES groups (id) ON DELETE CASCADE,
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (account_id, group_id),
-
-    CONSTRAINT fk_account_groups_account
-    FOREIGN KEY (account_id)
-    REFERENCES accounts (id)
-    ON DELETE CASCADE,
-
-    CONSTRAINT fk_account_groups_group
-    FOREIGN KEY (group_id)
-    REFERENCES groups (id)
-    ON DELETE CASCADE
+    PRIMARY KEY (account_id, group_id)
 );
