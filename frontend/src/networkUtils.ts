@@ -52,3 +52,47 @@ export const login = (email: string, password: string) =>
 export const loginMe = () => api.get<AuthResponse>("accounts/login/me");
 
 export const getUserSkills = () => api.get("accounts/skills");
+
+// Shorthand helpers
+const get = <T>(path: string) => api.get<T>(path);
+const post = <T>(path: string, body: unknown) => api.post<T>(path, body);
+const put = <T>(path: string, body: unknown) => api.put<T>(path, body);
+const del = <T>(path: string) => api.delete<T>(path);
+
+export const endpoints = {
+  // Auth (existing)
+  signup: (email: string, password: string, name: string) =>
+    post('/accounts/signup', { email, password, name }),
+  login: (email: string, password: string) =>
+    post('/accounts/login', { email, password }),
+  loginMe: () => get('/accounts/login/me'),
+
+  // Classes
+  getClasses: () => get('/classes'),
+  createClass: (name: string, section: string) => post('/classes/add', { name, section }),
+  updateClass: (id: number, data: { name?: string; section?: string }) => put(`/classes/update/${id}`, data),
+  deleteClass: (id: number) => del(`/classes/delete/${id}`),
+
+  // Posts
+  getPosts: (classId?: number) => get(classId ? `/posts?class_id=${classId}` : '/posts'),
+  createPost: (class_id: number, title: string, description: string) => post('/posts/add', { class_id, title, description }),
+  updatePost: (id: number, data: { title?: string; description?: string }) => put(`/posts/update/${id}`, data),
+  deletePost: (id: number) => del(`/posts/delete/${id}`),
+
+  // Groups
+  getGroups: (classId?: number) => get(classId ? `/groups?class_id=${classId}` : '/groups'),
+  createGroup: (class_id: number, group_name: string, max_members: number) => post('/groups/add', { class_id, group_name, max_members }),
+  updateGroup: (id: number, data: { group_name?: string; max_members?: number }) => put(`/groups/update/${id}`, data),
+  deleteGroup: (id: number) => del(`/groups/delete/${id}`),
+  joinGroup: (id: number) => post(`/groups/${id}/join`, {}),
+  leaveGroup: (id: number) => post(`/groups/${id}/leave`, {}),
+
+  // Skills
+  getUserSkills: () => get('/accounts/skills'),
+  getAllSkills: () => get('/skills'),
+  addUserSkills: (skillIds: number[]) => post('/accounts/skills/add', { skillIds }),
+  removeUserSkills: (skillIds: number[]) => post('/accounts/skills/delete', { skillIds }),
+
+  // Logout
+  logout: () => post('/accounts/logout', {}),
+};

@@ -50,7 +50,7 @@ router.post("/add", requireAuth, async (req: Request, res: Response) => {
 
     const result = await pool.query(
       `INSERT INTO posts (class_id, author_id, title, description)
-       VALUES ($1, $2, $3, $4, $5, )
+       VALUES ($1, $2, $3, $4)
        RETURNING *`,
       [class_id, authorId, title, description],
     );
@@ -68,6 +68,63 @@ router.post("/add", requireAuth, async (req: Request, res: Response) => {
     }
 
     res.status(500).json({ error: "Failed to create post" });
+  }
+});
+
+router.put("/update/:id", requireAuth, async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const postId = parseInt(req.params.id);
+
+  if (isNaN(postId)) {
+    res.status(400).json({ error: "Invalid post ID" });
+    return;
+  }
+
+  const { title, description } = req.body;
+
+  if (!title && !description) {
+    res.status(400).json({ error: "Nothing to update" });
+    return;
+  }
+
+  try {
+    const postCheck = await pool.query(`SELECT author_id FROM posts WHERE id = $1`, [postId]);
+
+    if (postCheck.rows.length === 0) {
+      res.status(404).json({ error: "Post not found" });
+      return;
+    }
+
+    if (postCheck.rows[0].author_id !== userId) {
+      res.status(403).json({ error: "You can only update your own posts" });
+      return;
+    }
+
+    const fields: string[] = [];
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (title) {
+      fields.push(`title = $${paramIndex++}`);
+      params.push(title);
+    }
+
+    if (description) {
+      fields.push(`description = $${paramIndex++}`);
+      params.push(description);
+    }
+
+    params.push(postId);
+
+    const result = await pool.query(
+      `UPDATE posts SET ${fields.join(", ")} WHERE id = $${paramIndex} RETURNING *`,
+      params,
+    );
+
+    res.json({ success: true, post: result.rows[0] });
+  } catch (error) {
+    console.error("Failed to update post:", error);
+    res.status(500).json({ error: "Failed to update post" });
   }
 });
 

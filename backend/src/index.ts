@@ -8,6 +8,7 @@ import accounts from "./routes/accounts/accountsIndex.js";
 import skills from "./routes/skills/skills.js";
 import classes from "./routes/classes/classes.js";
 import posts from "./routes/posts/posts.js";
+import groups from "./routes/groups/groups.js";
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -36,5 +37,6 @@ app.use("/health", health);
 app.use("/skills", skills);
 app.use("/classes", classes);
 app.use("/posts", posts);
+app.use("/groups", groups);
 
 app.listen(port);

@@ -14,7 +14,7 @@ router.post("", async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(
       `
-      SELECT id, email, password_hash, name
+      SELECT id, email, password_hash, name, is_admin
       FROM accounts
       WHERE email = $1
       `,
