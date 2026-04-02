@@ -11,7 +11,7 @@ export default async function seed() {
 
   const { rows } = await pool.query(
     `INSERT INTO accounts (email, password_hash, name, is_admin) 
-      VALUES ($1, $2, $3)
+      VALUES ($1, $2, $3, $4)
       RETURNING id, email, name, is_admin AS isAdmin`,
     [email, obfuscatedPassword, name, isAdmin],
   );
