@@ -230,4 +230,119 @@ router.delete("/delete/:id", requireAuth, async (req: Request, res: Response) =>
   }
 });
 
+router.post("/:id/join", requireAuth, async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const postId = parseInt(req.params.id);
+
+  if (isNaN(postId)) {
+    res.status(400).json({ error: "Invalid post ID" });
+    return;
+  }
+
+  try {
+    const postCheck = await pool.query(`SELECT group_id FROM posts WHERE id = $1`, [postId]);
+
+    if (postCheck.rows.length === 0) {
+      res.status(404).json({ error: "Post not found" });
+      return;
+    }
+
+    const groupId = postCheck.rows[0].group_id;
+
+    if (!groupId) {
+      res.status(400).json({ error: "This post has no associated group" });
+      return;
+    }
+
+    const groupCheck = await pool.query(
+      `SELECT g.max_members, COUNT(ag.account_id)::int as member_count
+       FROM groups g
+       LEFT JOIN account_groups ag ON g.id = ag.group_id
+       WHERE g.id = $1
+       GROUP BY g.id`,
+      [groupId],
+    );
+
+    const { max_members, member_count } = groupCheck.rows[0];
+
+    if (member_count >= max_members) {
+      res.status(400).json({ error: "Group is full" });
+      return;
+    }
+
+    const memberCheck = await pool.query(
+      `SELECT account_id FROM account_groups WHERE account_id = $1 AND group_id = $2`,
+      [userId, groupId],
+    );
+
+    if (memberCheck.rows.length > 0) {
+      res.status(400).json({ error: "You are already a member of this group" });
+      return;
+    }
+
+    await pool.query(
+      `INSERT INTO account_groups (account_id, group_id) VALUES ($1, $2)`,
+      [userId, groupId],
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to join group:", error);
+    res.status(500).json({ error: "Failed to join group" });
+  }
+});
+
+router.post("/:id/leave", requireAuth, async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const postId = parseInt(req.params.id);
+
+  if (isNaN(postId)) {
+    res.status(400).json({ error: "Invalid post ID" });
+    return;
+  }
+
+  try {
+    const postCheck = await pool.query(`SELECT group_id FROM posts WHERE id = $1`, [postId]);
+
+    if (postCheck.rows.length === 0) {
+      res.status(404).json({ error: "Post not found" });
+      return;
+    }
+
+    const groupId = postCheck.rows[0].group_id;
+
+    if (!groupId) {
+      res.status(400).json({ error: "This post has no associated group" });
+      return;
+    }
+
+    const groupCheck = await pool.query(`SELECT created_by FROM groups WHERE id = $1`, [groupId]);
+
+    if (groupCheck.rows[0].created_by === userId) {
+      res.status(400).json({ error: "The creator cannot leave the group" });
+      return;
+    }
+
+    const memberCheck = await pool.query(
+      `SELECT account_id FROM account_groups WHERE account_id = $1 AND group_id = $2`,
+      [userId, groupId],
+    );
+
+    if (memberCheck.rows.length === 0) {
+      res.status(400).json({ error: "You are not a member of this group" });
+      return;
+    }
+
+    await pool.query(
+      `DELETE FROM account_groups WHERE account_id = $1 AND group_id = $2`,
+      [userId, groupId],
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to leave group:", error);
+    res.status(500).json({ error: "Failed to leave group" });
+  }
+});
+
 export default router;

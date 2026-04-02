@@ -79,14 +79,6 @@ export const endpoints = {
   updatePost: (id: number, data: { title?: string; description?: string }) => put(`/posts/update/${id}`, data),
   deletePost: (id: number) => del(`/posts/delete/${id}`),
 
-  // Groups
-  getGroups: (classId?: number) => get(classId ? `/groups?class_id=${classId}` : '/groups'),
-  createGroup: (class_id: number, group_name: string, max_members: number) => post('/groups/add', { class_id, group_name, max_members }),
-  updateGroup: (id: number, data: { group_name?: string; max_members?: number }) => put(`/groups/update/${id}`, data),
-  deleteGroup: (id: number) => del(`/groups/delete/${id}`),
-  joinGroup: (id: number) => post(`/groups/${id}/join`, {}),
-  leaveGroup: (id: number) => post(`/groups/${id}/leave`, {}),
-
   // Skills
   getUserSkills: () => get('/accounts/skills'),
   getAllSkills: () => get('/skills'),

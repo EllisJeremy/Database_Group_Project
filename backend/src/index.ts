@@ -8,7 +8,7 @@ import accounts from "./routes/accounts/accountsIndex.js";
 import skills from "./routes/skills/skills.js";
 import classes from "./routes/classes/classes.js";
 import posts from "./routes/posts/posts.js";
-import groups from "./routes/groups/groups.js";
+import seed from "./seed.js";
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -29,6 +29,8 @@ app.use(
   }),
 );
 
+seed();
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -37,6 +39,5 @@ app.use("/health", health);
 app.use("/skills", skills);
 app.use("/classes", classes);
 app.use("/posts", posts);
-app.use("/groups", groups);
 
 app.listen(port);

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { usePostsStore, type Post, type PostGroup } from "../state/usePostsStore";
 import { useClassesStore } from "../state/useClassesStore";
-import { useGroupsStore } from "../state/useGroupsStore";
 import { useAuthStore } from "../state/useAuthStore";
 
 const SKILL_COLORS: Record<string, { bg: string; color: string }> = {
@@ -40,9 +39,8 @@ export default function ClassDetail() {
   const { id } = useParams<{ id: string }>();
   const classId = Number(id);
   const navigate = useNavigate();
-  const { posts, fetchPosts, createPost, updatePost, deletePost } = usePostsStore();
+  const { posts, fetchPosts, createPost, updatePost, deletePost, joinGroup, leaveGroup } = usePostsStore();
   const { classes, fetchClasses, deleteClass } = useClassesStore();
-  const { joinGroup, leaveGroup } = useGroupsStore();
   const user = useAuthStore((s) => s.user);
 
   const [showCreate, setShowCreate] = useState(false);
@@ -98,11 +96,10 @@ export default function ClassDetail() {
     navigate("/");
   };
 
-  const handleGroupAction = async (group: PostGroup, action: "join" | "leave") => {
+  const handleGroupAction = async (postId: number, action: "join" | "leave") => {
     try {
-      if (action === "join") await joinGroup(group.id);
-      else await leaveGroup(group.id);
-      await fetchPosts(classId);
+      if (action === "join") await joinGroup(postId);
+      else await leaveGroup(postId);
     } catch (e: any) {
       alert(e.message || `Failed to ${action} group`);
     }
@@ -442,7 +439,7 @@ function PostCard({
   userId?: number;
   onEdit: () => void;
   onDelete: () => void;
-  onGroupAction: (group: PostGroup, action: "join" | "leave") => void;
+  onGroupAction: (postId: number, action: "join" | "leave") => void;
 }) {
   const knownSkills = ["Python", "PostgreSQL", "React", "Java", "Spring", "JavaScript", "TypeScript", "Go", "Rust", "Docker", "Express", "Django", "Next.js", "Vue", "Angular", "MongoDB", "MySQL", "Redis", "AWS", "Firebase"];
   const mentionedSkills = knownSkills.filter(
@@ -623,7 +620,7 @@ function PostCard({
           {!isGroupOwner && (
             isMember ? (
               <button
-                onClick={() => onGroupAction(group, "leave")}
+                onClick={() => onGroupAction(post.id, "leave")}
                 style={{
                   alignSelf: "flex-start",
                   padding: "8px 18px",
@@ -641,7 +638,7 @@ function PostCard({
               </button>
             ) : (
               <button
-                onClick={() => !isFull && onGroupAction(group, "join")}
+                onClick={() => !isFull && onGroupAction(post.id, "join")}
                 disabled={isFull}
                 style={{
                   alignSelf: "flex-start",

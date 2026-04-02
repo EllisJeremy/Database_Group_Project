@@ -28,6 +28,8 @@ interface PostsState {
   createPost: (classId: number, title: string, description: string, groupName?: string, maxMembers?: number) => Promise<void>;
   updatePost: (id: number, data: { title?: string; description?: string }) => Promise<void>;
   deletePost: (id: number) => Promise<void>;
+  joinGroup: (postId: number) => Promise<void>;
+  leaveGroup: (postId: number) => Promise<void>;
 }
 
 export const usePostsStore = create<PostsState>((set, get) => ({
@@ -69,6 +71,18 @@ export const usePostsStore = create<PostsState>((set, get) => ({
     const currentPosts = get().posts;
     const classId = currentPosts.find((p) => p.id === id)?.class_id;
     await api.delete(`posts/delete/${id}`);
+    if (classId) await get().fetchPosts(classId);
+  },
+
+  joinGroup: async (postId) => {
+    await api.post(`posts/${postId}/join`, {});
+    const classId = get().posts.find((p) => p.id === postId)?.class_id;
+    if (classId) await get().fetchPosts(classId);
+  },
+
+  leaveGroup: async (postId) => {
+    await api.post(`posts/${postId}/leave`, {});
+    const classId = get().posts.find((p) => p.id === postId)?.class_id;
     if (classId) await get().fetchPosts(classId);
   },
 }));
