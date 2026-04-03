@@ -32,4 +32,7 @@ export const env = {
   DATABASE_PASSWORD: getEnv("DATABASE_PASSWORD"),
   DATABASE_NAME: getEnv("DATABASE_NAME"),
   DATABASE_URL: getEnv("DATABASE_URL"),
+
+  EMAIL: getEnv("EMAIL"),
+  EMAIL_PASSWORD: getEnv("EMAIL_PASSWORD"),
 } as const;
