@@ -4,56 +4,73 @@ import { requireAuth } from "../../middleware/requireAuth";
 
 const router = Router();
 
-router.get("", async (req: Request, res: Response) => {
+router.get("", requireAuth, async (req: Request, res: Response) => {
   const { class_id } = req.query;
+  const userId = req.user.id;
 
   try {
-    let query = `
-      SELECT
-        p.*,
-        a.name as author_name,
-        c.name as class_name,
-        c.section as class_section,
-        g.id as group_id,
-        g.group_name,
-        g.max_members as group_max_members,
-        g.created_by as group_created_by
-      FROM posts p
-      JOIN accounts a ON p.author_id = a.id
-      JOIN classes c ON p.class_id = c.id
-      LEFT JOIN groups g ON p.group_id = g.id
-    `;
-
-    const params: any[] = [];
-
-    if (class_id) {
-      query += ` WHERE p.class_id = $1`;
-      params.push(class_id);
-    }
-
-    query += ` ORDER BY p.created_at DESC`;
+    const params: any[] = [userId];
+    const query = `
+        WITH user_skills AS (
+          SELECT skill_id FROM account_skills WHERE account_id = $1
+        )
+        SELECT
+          p.*,
+          a.name as author_name,
+          c.name as class_name,
+          c.section as class_section,
+          g.id as group_id,
+          g.group_name,
+          g.max_members as group_max_members,
+          g.created_by as group_created_by,
+          COALESCE((
+            SELECT COUNT(*)::int
+            FROM account_groups ag2
+            JOIN account_skills ags2 ON ag2.account_id = ags2.account_id
+            JOIN user_skills us ON ags2.skill_id = us.skill_id
+            WHERE ag2.group_id = g.id
+          ), 0) as skill_match_score
+        FROM posts p
+        JOIN accounts a ON p.author_id = a.id
+        JOIN classes c ON p.class_id = c.id
+        LEFT JOIN groups g ON p.group_id = g.id
+        ${class_id ? "WHERE p.class_id = $2" : ""}
+        ORDER BY skill_match_score DESC, p.created_at DESC
+      `;
+    if (class_id) params.push(class_id);
 
     const { rows: posts } = await pool.query(query, params);
 
-    // Fetch members for any linked groups
     const groupIds = posts.filter((p: any) => p.group_id).map((p: any) => p.group_id);
 
     const membersByGroup: Record<number, any[]> = {};
     if (groupIds.length > 0) {
       const { rows: members } = await pool.query(
-        `SELECT ag.group_id, ag.account_id, a.name
+        `SELECT ag.group_id, ag.account_id, a.name,
+          COALESCE(
+            json_agg(
+              json_build_object('id', s.id, 'name', s.name, 'type', s.type)
+            ) FILTER (WHERE s.id IS NOT NULL),
+            '[]'::json
+          ) as skills
          FROM account_groups ag
          JOIN accounts a ON ag.account_id = a.id
-         WHERE ag.group_id = ANY($1)`,
+         LEFT JOIN account_skills aks ON ag.account_id = aks.account_id
+         LEFT JOIN skills s ON aks.skill_id = s.id
+         WHERE ag.group_id = ANY($1)
+         GROUP BY ag.group_id, ag.account_id, a.name`,
         [groupIds],
       );
       for (const member of members) {
         if (!membersByGroup[member.group_id]) membersByGroup[member.group_id] = [];
-        membersByGroup[member.group_id].push({ account_id: member.account_id, name: member.name });
+        membersByGroup[member.group_id].push({
+          account_id: member.account_id,
+          name: member.name,
+          skills: member.skills,
+        });
       }
     }
 
-    // Shape group info into a nested object
     for (const post of posts) {
       if (post.group_id) {
         post.group = {
@@ -78,7 +95,7 @@ router.get("", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/add", requireAuth, async (req: Request, res: Response) => {
+router.post("/add", async (req: Request, res: Response) => {
   const authorId = req.user.id;
   const { class_id, title, description, group_name, max_members } = req.body;
 
@@ -104,10 +121,10 @@ router.post("/add", requireAuth, async (req: Request, res: Response) => {
         groupId = groupResult.rows[0].id;
 
         // Auto-join the creator
-        await client.query(
-          `INSERT INTO account_groups (account_id, group_id) VALUES ($1, $2)`,
-          [authorId, groupId],
-        );
+        await client.query(`INSERT INTO account_groups (account_id, group_id) VALUES ($1, $2)`, [
+          authorId,
+          groupId,
+        ]);
       }
 
       const result = await client.query(
@@ -135,7 +152,7 @@ router.post("/add", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.put("/update/:id", requireAuth, async (req: Request, res: Response) => {
+router.put("/update/:id", async (req: Request, res: Response) => {
   const userId = req.user.id;
   const postId = parseInt(req.params.id);
 
@@ -192,7 +209,7 @@ router.put("/update/:id", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/delete/:id", requireAuth, async (req: Request, res: Response) => {
+router.delete("/delete/:id", async (req: Request, res: Response) => {
   const userId = req.user.id;
   const postId = parseInt(req.params.id);
 
@@ -202,7 +219,9 @@ router.delete("/delete/:id", requireAuth, async (req: Request, res: Response) =>
   }
 
   try {
-    const postCheck = await pool.query(`SELECT author_id, group_id FROM posts WHERE id = $1`, [postId]);
+    const postCheck = await pool.query(`SELECT author_id, group_id FROM posts WHERE id = $1`, [
+      postId,
+    ]);
 
     if (postCheck.rows.length === 0) {
       res.status(404).json({ error: "Post not found" });
@@ -230,7 +249,7 @@ router.delete("/delete/:id", requireAuth, async (req: Request, res: Response) =>
   }
 });
 
-router.post("/:id/join", requireAuth, async (req: Request, res: Response) => {
+router.post("/:id/join", async (req: Request, res: Response) => {
   const userId = req.user.id;
   const postId = parseInt(req.params.id);
 
@@ -280,10 +299,10 @@ router.post("/:id/join", requireAuth, async (req: Request, res: Response) => {
       return;
     }
 
-    await pool.query(
-      `INSERT INTO account_groups (account_id, group_id) VALUES ($1, $2)`,
-      [userId, groupId],
-    );
+    await pool.query(`INSERT INTO account_groups (account_id, group_id) VALUES ($1, $2)`, [
+      userId,
+      groupId,
+    ]);
 
     res.json({ success: true });
   } catch (error) {
@@ -292,7 +311,7 @@ router.post("/:id/join", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.post("/:id/leave", requireAuth, async (req: Request, res: Response) => {
+router.post("/:id/leave", async (req: Request, res: Response) => {
   const userId = req.user.id;
   const postId = parseInt(req.params.id);
 
@@ -333,10 +352,10 @@ router.post("/:id/leave", requireAuth, async (req: Request, res: Response) => {
       return;
     }
 
-    await pool.query(
-      `DELETE FROM account_groups WHERE account_id = $1 AND group_id = $2`,
-      [userId, groupId],
-    );
+    await pool.query(`DELETE FROM account_groups WHERE account_id = $1 AND group_id = $2`, [
+      userId,
+      groupId,
+    ]);
 
     res.json({ success: true });
   } catch (error) {

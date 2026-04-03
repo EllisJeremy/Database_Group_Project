@@ -74,22 +74,20 @@ INSERT INTO account_skills (account_id, skill_id) VALUES
 (7, 9);  -- frank: rust
 
 INSERT INTO classes (name, section, creator_id) VALUES
-('Database Systems', '001', 1),   -- id 1, jeremy
-('Web Development', '002', 2),    -- id 2, alice
-('Algorithms', '001', 3),         -- id 3, bob
-('Operating Systems', '003', 1),  -- id 4, jeremy
-('Software Engineering', '002', 4); -- id 5, carol
+('Database Systems', '001', 1),
+('Web Development', '002', 2),
+('Algorithms', '001', 3),
+('Operating Systems', '003', 1),
+('Software Engineering', '002', 4);
 
--- Groups created by the same person who posts the ad
 INSERT INTO groups (class_id, group_name, max_members, created_by) VALUES
-(1, 'DB Heroes', 4, 1),         -- id 1, jeremy, class 1
-(1, 'DB Study Group', 3, 2),    -- id 2, alice, class 1
-(2, 'Web Wizards', 3, 3),       -- id 3, bob, class 2
-(3, 'Algo Squad', 5, 4),        -- id 4, carol, class 3
-(4, 'Kernel Panic', 4, 5),      -- id 5, dave, class 4
-(5, 'Agile Avengers', 4, 2);    -- id 6, alice, class 5
+(1, 'DB Heroes', 4, 1),
+(1, 'DB Study Group', 3, 2),
+(2, 'Web Wizards', 3, 3),
+(3, 'Algo Squad', 5, 4),
+(4, 'Kernel Panic', 4, 5),
+(5, 'Agile Avengers', 4, 2);
 
--- Posts linked to their group (post is the group's ad)
 INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
 (1, 1, 1, 'Looking for DB project partners', 'Need 2 more people for the final project. We are using PostgreSQL and Python.'),
 (1, 2, 2, 'Study group for midterm', 'Reviewing indexing and transactions. Open to all levels.'),
@@ -98,7 +96,6 @@ INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
 (4, 5, 5, 'OS project group', 'Working on the scheduler project. Looking for systems programmers.'),
 (5, 2, 6, 'SE team forming', 'Looking for members for agile project. Experience with Git and Scrum a plus.');
 
--- Group members (creator auto-joined + others who joined)
 INSERT INTO account_groups (account_id, group_id) VALUES
 (1, 1), -- jeremy in DB Heroes (creator)
 (3, 1), -- bob in DB Heroes
@@ -113,3 +110,66 @@ INSERT INTO account_groups (account_id, group_id) VALUES
 (2, 6), -- alice in Agile Avengers (creator)
 (1, 6), -- jeremy in Agile Avengers
 (3, 6); -- bob in Agile Avengers
+
+-- Web Development skill-match demo
+-- Overlap relative to account id=1 (python, javascript, react)
+
+INSERT INTO accounts (email, password_hash, name) VALUES
+-- id 8: shares python+javascript+react (high match)
+('sarah@example.com', 'Hash8', 'sarah'),
+-- id 9: shares javascript+react (high match)
+('mike@example.com', 'Hash9', 'mike'),
+-- id 10: shares typescript only (low match)
+('tom@example.com', 'Hash10', 'tom'),
+-- id 11: shares python only (low match)
+('lisa@example.com', 'Hash11', 'lisa'),
+-- id 12: no shared skills (no match)
+('chen@example.com', 'Hash12', 'chen'),
+-- id 13: no shared skills (no match)
+('priya@example.com', 'Hash13', 'priya');
+
+INSERT INTO account_skills (account_id, skill_id) VALUES
+-- sarah: python(1), javascript(6), react(14), typescript(7)
+(8, 1),
+(8, 6),
+(8, 14),
+(8, 7),
+-- mike: javascript(6), react(14), next.js(15)
+(9, 6),
+(9, 14),
+(9, 15),
+-- tom: typescript(7), express(18), vue(16)
+(10, 7),
+(10, 18),
+(10, 16),
+-- lisa: python(1), django(20), postgresql(23)
+(11, 1),
+(11, 20),
+(11, 23),
+-- chen: java(2), spring(22), mysql(24)
+(12, 2),
+(12, 22),
+(12, 24),
+-- priya: go(8), rust(9), docker(31)
+(13, 8),
+(13, 9),
+(13, 31);
+
+-- id 7: high match, id 8: low match, id 9: no match
+INSERT INTO groups (class_id, group_name, max_members, created_by) VALUES
+(2, 'JS React Team', 4, 8),
+(2, 'Full Stack Crew', 4, 10),
+(2, 'Backend Masters', 4, 12);
+
+INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
+(2, 8, 7, 'React + Node app — need 2 more!', 'Full-stack with React and Node. Big on JS and TypeScript.'),
+(2, 10, 8, 'Full stack team forming', 'TypeScript frontend, Python backend. Need versatile devs.'),
+(2, 12, 9, 'Java Spring Boot backend group', 'Enterprise backend with Java, Spring, and MySQL.');
+
+INSERT INTO account_groups (account_id, group_id) VALUES
+(8, 7),
+(9, 7),
+(10, 8),
+(11, 8),
+(12, 9),
+(13, 9);

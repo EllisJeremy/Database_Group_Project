@@ -9,10 +9,10 @@ export default async function seed() {
   const isAdmin = true;
   const obfuscatedPassword = await bcrypt.hash(password, 10);
 
-  const { rows } = await pool.query(
-    `INSERT INTO accounts (email, password_hash, name, is_admin) 
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, email, name, is_admin AS isAdmin`,
+  await pool.query(
+    `INSERT INTO accounts (email, password_hash, name, is_admin)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (email) DO NOTHING`,
     [email, obfuscatedPassword, name, isAdmin],
   );
 }

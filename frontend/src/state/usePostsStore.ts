@@ -1,12 +1,24 @@
 import { create } from "zustand";
 import { api } from "../networkUtils";
 
+export interface MemberSkill {
+  id: number;
+  name: string;
+  type: string;
+}
+
+export interface GroupMember {
+  account_id: number;
+  name: string;
+  skills: MemberSkill[];
+}
+
 export interface PostGroup {
   id: number;
   group_name: string;
   max_members: number;
   created_by: number;
-  members: Array<{ account_id: number; name: string }>;
+  members: GroupMember[];
 }
 
 export interface Post {
@@ -19,6 +31,7 @@ export interface Post {
   author_name?: string;
   class_name?: string;
   group?: PostGroup | null;
+  skill_match_score?: number;
 }
 
 interface PostsState {

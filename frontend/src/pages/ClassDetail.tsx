@@ -1,18 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { usePostsStore, type Post, type PostGroup } from "../state/usePostsStore";
+import { usePostsStore, type Post } from "../state/usePostsStore";
 import { useClassesStore } from "../state/useClassesStore";
+import { useSkillsStore } from "../state/useSkillsStore";
 import { useAuthStore } from "../state/useAuthStore";
-
-const SKILL_COLORS: Record<string, { bg: string; color: string }> = {
-  Python: { bg: "rgba(79,70,229,0.08)", color: "#6d28d9" },
-  PostgreSQL: { bg: "rgba(16,185,129,0.08)", color: "#059669" },
-  React: { bg: "rgba(59,130,246,0.08)", color: "#2563eb" },
-  Java: { bg: "rgba(236,72,153,0.08)", color: "#db2777" },
-  Spring: { bg: "rgba(16,185,129,0.08)", color: "#059669" },
-  JavaScript: { bg: "rgba(245,158,11,0.08)", color: "#b45309" },
-  TypeScript: { bg: "rgba(59,130,246,0.08)", color: "#1d4ed8" },
-};
 
 const AVATAR_COLORS = [
   "linear-gradient(135deg, #6366f1, #a855f7)",
@@ -21,10 +12,6 @@ const AVATAR_COLORS = [
   "linear-gradient(135deg, #f59e0b, #f97316)",
   "linear-gradient(135deg, #3b82f6, #2563eb)",
 ];
-
-function getSkillStyle(skill: string) {
-  return SKILL_COLORS[skill] || { bg: "rgba(99,102,241,0.08)", color: "#4f46e5" };
-}
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -39,8 +26,10 @@ export default function ClassDetail() {
   const { id } = useParams<{ id: string }>();
   const classId = Number(id);
   const navigate = useNavigate();
-  const { posts, fetchPosts, createPost, updatePost, deletePost, joinGroup, leaveGroup } = usePostsStore();
+  const { posts, fetchPosts, createPost, updatePost, deletePost, joinGroup, leaveGroup } =
+    usePostsStore();
   const { classes, fetchClasses, deleteClass } = useClassesStore();
+  const { userSkills, fetchUserSkills } = useSkillsStore();
   const user = useAuthStore((s) => s.user);
 
   const [showCreate, setShowCreate] = useState(false);
@@ -52,16 +41,24 @@ export default function ClassDetail() {
 
   const cls = classes.find((c) => c.id === classId);
   const isOwner = user?.id === cls?.creator_id;
+  const userSkillIds = new Set(userSkills.map((s) => s.id));
 
   useEffect(() => {
     fetchPosts(classId);
+    fetchUserSkills();
     if (classes.length === 0) fetchClasses();
   }, [classId]);
 
   const handleCreate = async () => {
     if (!title.trim() || !description.trim() || !groupName.trim()) return;
     try {
-      await createPost(classId, title.trim(), description.trim(), groupName.trim(), Number(maxMembers));
+      await createPost(
+        classId,
+        title.trim(),
+        description.trim(),
+        groupName.trim(),
+        Number(maxMembers),
+      );
       setTitle("");
       setDescription("");
       setGroupName("");
@@ -140,7 +137,9 @@ export default function ClassDetail() {
             </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ fontFamily: '"Instrument Serif", serif', fontSize: 32, color: "#111118" }}>
+            <span
+              style={{ fontFamily: '"Instrument Serif", serif', fontSize: 32, color: "#111118" }}
+            >
               {cls?.name ?? "Loading..."}
             </span>
             <span style={{ fontSize: 13, color: "#71717a" }}>
@@ -208,6 +207,7 @@ export default function ClassDetail() {
             post={post}
             isAuthor={user?.id === post.author_id}
             userId={user?.id}
+            userSkillIds={userSkillIds}
             onEdit={() => openEdit(post)}
             onDelete={() => deletePost(post.id)}
             onGroupAction={handleGroupAction}
@@ -299,7 +299,9 @@ export default function ClassDetail() {
                 />
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>Description</label>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>
+                  Description
+                </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -323,14 +325,18 @@ export default function ClassDetail() {
                 <>
                   <div style={{ height: 1, background: "#f4f4f5" }} />
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#111118" }}>Your Group</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#111118" }}>
+                      Your Group
+                    </span>
                     <span style={{ fontSize: 12, color: "#71717a" }}>
                       This post is an ad for your group. People can join directly from the post.
                     </span>
                   </div>
                   <div style={{ display: "flex", gap: 12 }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
-                      <label style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>Group Name</label>
+                      <label style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>
+                        Group Name
+                      </label>
                       <input
                         value={groupName}
                         onChange={(e) => setGroupName(e.target.value)}
@@ -348,7 +354,9 @@ export default function ClassDetail() {
                       />
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 6, width: 120 }}>
-                      <label style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>Max Members</label>
+                      <label style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>
+                        Max Members
+                      </label>
                       <input
                         type="number"
                         min="2"
@@ -430,6 +438,7 @@ function PostCard({
   post,
   isAuthor,
   userId,
+  userSkillIds,
   onEdit,
   onDelete,
   onGroupAction,
@@ -437,21 +446,16 @@ function PostCard({
   post: Post;
   isAuthor: boolean;
   userId?: number;
+  userSkillIds: Set<number>;
   onEdit: () => void;
   onDelete: () => void;
   onGroupAction: (postId: number, action: "join" | "leave") => void;
 }) {
-  const knownSkills = ["Python", "PostgreSQL", "React", "Java", "Spring", "JavaScript", "TypeScript", "Go", "Rust", "Docker", "Express", "Django", "Next.js", "Vue", "Angular", "MongoDB", "MySQL", "Redis", "AWS", "Firebase"];
-  const mentionedSkills = knownSkills.filter(
-    (s) =>
-      post.title.toLowerCase().includes(s.toLowerCase()) ||
-      post.description.toLowerCase().includes(s.toLowerCase()),
-  );
-
   const group = post.group;
   const isMember = group?.members?.some((m) => m.account_id === userId);
   const isGroupOwner = group?.created_by === userId;
   const isFull = group ? group.members.length >= group.max_members : false;
+  const matchScore = post.skill_match_score ?? 0;
 
   return (
     <div
@@ -467,9 +471,13 @@ function PostCard({
     >
       {/* Post content */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, paddingRight: 20 }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, paddingRight: 20 }}
+        >
           <span style={{ fontSize: 17, fontWeight: 700, color: "#111118" }}>{post.title}</span>
-          <span style={{ fontSize: 14, color: "#52525b", lineHeight: 1.6 }}>{post.description}</span>
+          <span style={{ fontSize: 14, color: "#52525b", lineHeight: 1.6 }}>
+            {post.description}
+          </span>
         </div>
         {isAuthor && (
           <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
@@ -509,30 +517,6 @@ function PostCard({
         )}
       </div>
 
-      {/* Skill tags */}
-      {mentionedSkills.length > 0 && (
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {mentionedSkills.map((skill) => {
-            const s = getSkillStyle(skill);
-            return (
-              <span
-                key={skill}
-                style={{
-                  padding: "4px 12px",
-                  background: s.bg,
-                  borderRadius: 20,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: s.color,
-                }}
-              >
-                {skill}
-              </span>
-            );
-          })}
-        </div>
-      )}
-
       {/* Inline group */}
       {group && (
         <div
@@ -543,9 +527,10 @@ function PostCard({
             padding: "16px 20px",
             display: "flex",
             flexDirection: "column",
-            gap: 12,
+            gap: 14,
           }}
         >
+          {/* Group header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div
@@ -563,62 +548,103 @@ function PostCard({
                   {group.group_name.slice(0, 2).toUpperCase()}
                 </span>
               </div>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#111118" }}>{group.group_name}</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#111118" }}>
+                {group.group_name}
+              </span>
             </div>
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: isFull ? "#dc2626" : "#16a34a",
-                background: isFull ? "#fef2f2" : "#f0fdf4",
-                padding: "3px 10px",
-                borderRadius: 20,
-              }}
-            >
-              {group.members.length} / {group.max_members} {isFull ? "· Full" : "· Open"}
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {matchScore > 0 && (
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "#7c3aed",
+                    background: "rgba(124,58,237,0.08)",
+                    border: "1px solid rgba(124,58,237,0.2)",
+                    padding: "3px 10px",
+                    borderRadius: 20,
+                  }}
+                >
+                  {matchScore} skill {matchScore === 1 ? "match" : "matches"}
+                </span>
+              )}
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: isFull ? "#dc2626" : "#16a34a",
+                  background: isFull ? "#fef2f2" : "#f0fdf4",
+                  padding: "3px 10px",
+                  borderRadius: 20,
+                }}
+              >
+                {group.members.length} / {group.max_members} {isFull ? "· Full" : "· Open"}
+              </span>
+            </div>
           </div>
 
-          {/* Members */}
+          {/* Members with skills */}
           {group.members.length > 0 && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {group.members.map((member, idx) => (
                 <div
                   key={member.account_id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                    padding: "4px 10px",
-                    background: "white",
-                    borderRadius: 20,
-                    border: "1px solid #e4e4e7",
-                  }}
+                  style={{ display: "flex", flexDirection: "column", gap: 5 }}
                 >
-                  <div
-                    style={{
-                      width: 16,
-                      height: 16,
-                      background: AVATAR_COLORS[idx % AVATAR_COLORS.length],
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <span style={{ fontSize: 7, fontWeight: 700, color: "white" }}>
-                      {member.name.slice(0, 2).toUpperCase()}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        background: AVATAR_COLORS[idx % AVATAR_COLORS.length],
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <span style={{ fontSize: 7, fontWeight: 700, color: "white" }}>
+                        {member.name.slice(0, 2).toUpperCase()}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>
+                      {member.name}
                     </span>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: "#3f3f46" }}>{member.name}</span>
+                  {member.skills.length > 0 && (
+                    <div style={{ display: "flex", gap: 4, flexWrap: "wrap", paddingLeft: 26 }}>
+                      {member.skills.map((skill) => {
+                        const isMatch = userSkillIds.has(skill.id);
+                        return (
+                          <span
+                            key={skill.id}
+                            style={{
+                              padding: "2px 8px",
+                              borderRadius: 12,
+                              fontSize: 11,
+                              fontWeight: 600,
+                              background: isMatch ? "rgba(79,70,229,0.1)" : "#f4f4f5",
+                              color: isMatch ? "#4f46e5" : "#71717a",
+                              border: isMatch
+                                ? "1px solid rgba(79,70,229,0.3)"
+                                : "1px solid transparent",
+                            }}
+                          >
+                            {skill.name}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
 
           {/* Join/Leave */}
-          {!isGroupOwner && (
-            isMember ? (
+          {!isGroupOwner &&
+            (isMember ? (
               <button
                 onClick={() => onGroupAction(post.id, "leave")}
                 style={{
@@ -655,10 +681,11 @@ function PostCard({
               >
                 {isFull ? "Group Full" : "Join Group"}
               </button>
-            )
-          )}
+            ))}
           {isGroupOwner && (
-            <span style={{ fontSize: 12, color: "#7c3aed", fontWeight: 500 }}>You own this group</span>
+            <span style={{ fontSize: 12, color: "#7c3aed", fontWeight: 500 }}>
+              You own this group
+            </span>
           )}
         </div>
       )}
