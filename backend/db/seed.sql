@@ -255,3 +255,65 @@ INSERT INTO account_groups (account_id, group_id, is_pending) VALUES
 (11, 8, false),
 (12, 9, false),
 (13, 9, false);
+
+-- Expand each table to 20 tuples
+
+-- accounts: add 7 more (IDs 14-20)
+INSERT INTO accounts (email, password_hash, name) VALUES
+('nina@example.com',   '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC', 'nina'),
+('oscar@example.com',  '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC', 'oscar'),
+('pam@example.com',    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC', 'pam'),
+('quinn@example.com',  '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC', 'quinn'),
+('rachel@example.com', '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC', 'rachel'),
+('sam@example.com',    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC', 'sam'),
+('tina@example.com',   '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC', 'tina');
+
+-- classes: add 15 more (IDs 6-20)
+INSERT INTO classes (name, section, creator_id) VALUES
+('Machine Learning',             '001', 2),
+('Computer Networks',            '002', 3),
+('Cybersecurity',                '001', 4),
+('Data Structures',              '003', 5),
+('Cloud Computing',              '001', 6),
+('Mobile Development',           '002', 7),
+('Artificial Intelligence',      '001', 8),
+('Human-Computer Interaction',   '002', 9),
+('Computer Architecture',        '001', 10),
+('Distributed Systems',          '003', 11),
+('Game Development',             '002', 12),
+('DevOps',                       '001', 13),
+('Embedded Systems',             '002', 14),
+('Parallel Computing',           '001', 15),
+('Natural Language Processing',  '003', 16);
+
+-- groups: add 11 more (IDs 10-20)
+INSERT INTO groups (class_id, group_name, max_members, created_by) VALUES
+(6,  'ML Pioneers',          4, 2),
+(7,  'Network Ninjas',       3, 3),
+(8,  'Cyber Defenders',      4, 4),
+(9,  'Data Structures Club', 5, 5),
+(10, 'Cloud Climbers',       4, 6),
+(11, 'App Builders',         3, 7),
+(12, 'AI Explorers',         5, 8),
+(13, 'UX Team',              4, 9),
+(14, 'Arch Angels',          4, 10),
+(15, 'Dist Devs',            5, 11),
+(16, 'Game Gurus',           4, 12);
+
+-- posts: add 11 more (IDs 10-20)
+INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
+(6,  2,  10, 'ML group forming',               'Looking for partners for the ML project. Using scikit-learn and TensorFlow.'),
+(7,  3,  11, 'Networks lab partners needed',   'Working on packet analysis. Need 2 more members with networking experience.'),
+(8,  4,  12, 'Cybersecurity CTF team',         'Forming a CTF team for the semester finale. All skill levels welcome.'),
+(9,  5,  13, 'Data Structures study group',    'Weekly sessions on trees, heaps, and graphs. Come with questions.'),
+(10, 6,  14, 'Cloud project team forming',     'AWS-based project. Looking for people with cloud or backend experience.'),
+(11, 7,  15, 'Mobile app dev partners',        'Building a React Native app. Need 2 more devs familiar with JS.'),
+(12, 8,  16, 'AI research group',              'NLP and computer vision focus. Python and PyTorch experience preferred.'),
+(13, 9,  17, 'HCI design team',               'User research and prototyping project. Designers and devs both welcome.'),
+(14, 10, 18, 'Computer Arch project group',    'Cache design and CPU pipeline project. Low-level programming a must.'),
+(15, 11, 19, 'Distributed systems group',      'Building a distributed key-value store. Go or Rust preferred.'),
+(16, 12, 20, 'Game dev team forming',          'Unity game project. Looking for both programmers and designers.');
+
+-- account_groups: add 1 more (reaches 20)
+INSERT INTO account_groups (account_id, group_id, is_pending) VALUES
+(14, 10, false);
