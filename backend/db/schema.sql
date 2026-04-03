@@ -58,6 +58,7 @@ CREATE TABLE posts (
 CREATE TABLE account_groups (
     account_id INTEGER NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
     group_id INTEGER NOT NULL REFERENCES groups (id) ON DELETE CASCADE,
+    is_pending BOOLEAN NOT NULL DEFAULT true,
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (account_id, group_id)
 );

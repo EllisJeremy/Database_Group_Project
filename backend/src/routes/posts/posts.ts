@@ -13,33 +13,34 @@ router.get("", async (req: Request, res: Response) => {
   try {
     const params: any[] = [userId];
     const query = `
-        WITH user_skills AS (
-          SELECT skill_id FROM account_skills WHERE account_id = $1
-        )
-        SELECT
-          p.*,
-          a.name as author_name,
-          c.name as class_name,
-          c.section as class_section,
-          g.id as group_id,
-          g.group_name,
-          g.max_members as group_max_members,
-          g.created_by as group_created_by,
-          COALESCE((
-            SELECT COUNT(*)::int
-            FROM account_groups ag2
-            JOIN account_skills ags2 ON ag2.account_id = ags2.account_id
-            JOIN user_skills us ON ags2.skill_id = us.skill_id
-            WHERE ag2.group_id = g.id
-            AND ag2.account_id != $1
-          ), 0) as skill_match_score
-        FROM posts p
-        JOIN accounts a ON p.author_id = a.id
-        JOIN classes c ON p.class_id = c.id
-        LEFT JOIN groups g ON p.group_id = g.id
-        ${class_id ? "WHERE p.class_id = $2" : ""}
-        ORDER BY skill_match_score DESC, p.created_at DESC
-      `;
+      WITH user_skills AS (
+        SELECT skill_id FROM account_skills WHERE account_id = $1
+      )
+      SELECT
+        p.*,
+        a.name as author_name,
+        c.name as class_name,
+        c.section as class_section,
+        g.id as group_id,
+        g.group_name,
+        g.max_members as group_max_members,
+        g.created_by as group_created_by,
+        COALESCE((
+          SELECT COUNT(*)::int
+          FROM account_groups ag2
+          JOIN account_skills ags2 ON ag2.account_id = ags2.account_id
+          JOIN user_skills us ON ags2.skill_id = us.skill_id
+          WHERE ag2.group_id = g.id
+          AND ag2.account_id != $1
+          AND ag2.is_pending = false
+        ), 0) as skill_match_score
+      FROM posts p
+      JOIN accounts a ON p.author_id = a.id
+      JOIN classes c ON p.class_id = c.id
+      LEFT JOIN groups g ON p.group_id = g.id
+      ${class_id ? "WHERE p.class_id = $2" : ""}
+      ORDER BY skill_match_score DESC, p.created_at DESC
+    `;
     if (class_id) params.push(class_id);
 
     const { rows: posts } = await pool.query(query, params);
@@ -48,8 +49,10 @@ router.get("", async (req: Request, res: Response) => {
 
     const membersByGroup: Record<number, any[]> = {};
     if (groupIds.length > 0) {
+      // Show confirmed members to everyone.
+      // Show pending members only to the pending person themselves or the group creator.
       const { rows: members } = await pool.query(
-        `SELECT ag.group_id, ag.account_id, a.name,
+        `SELECT ag.group_id, ag.account_id, ag.is_pending, a.name,
           COALESCE(
             json_agg(
               json_build_object('id', s.id, 'name', s.name, 'type', s.type)
@@ -58,17 +61,20 @@ router.get("", async (req: Request, res: Response) => {
           ) as skills
          FROM account_groups ag
          JOIN accounts a ON ag.account_id = a.id
+         JOIN groups g ON ag.group_id = g.id
          LEFT JOIN account_skills aks ON ag.account_id = aks.account_id
          LEFT JOIN skills s ON aks.skill_id = s.id
          WHERE ag.group_id = ANY($1)
-         GROUP BY ag.group_id, ag.account_id, a.name`,
-        [groupIds],
+           AND (ag.is_pending = false OR ag.account_id = $2 OR g.created_by = $2)
+         GROUP BY ag.group_id, ag.account_id, ag.is_pending, a.name`,
+        [groupIds, userId],
       );
       for (const member of members) {
         if (!membersByGroup[member.group_id]) membersByGroup[member.group_id] = [];
         membersByGroup[member.group_id].push({
           account_id: member.account_id,
           name: member.name,
+          is_pending: member.is_pending,
           skills: member.skills,
         });
       }
@@ -123,11 +129,11 @@ router.post("/add", async (req: Request, res: Response) => {
         );
         groupId = groupResult.rows[0].id;
 
-        // Auto-join the creator
-        await client.query(`INSERT INTO account_groups (account_id, group_id) VALUES ($1, $2)`, [
-          authorId,
-          groupId,
-        ]);
+        // Creator auto-joins as confirmed (not pending)
+        await client.query(
+          `INSERT INTO account_groups (account_id, group_id, is_pending) VALUES ($1, $2, false)`,
+          [authorId, groupId],
+        );
       }
 
       const result = await client.query(
@@ -222,9 +228,7 @@ router.delete("/delete/:id", async (req: Request, res: Response) => {
   }
 
   try {
-    const postCheck = await pool.query(`SELECT author_id, group_id FROM posts WHERE id = $1`, [
-      postId,
-    ]);
+    const postCheck = await pool.query(`SELECT author_id, group_id FROM posts WHERE id = $1`, [postId]);
 
     if (postCheck.rows.length === 0) {
       res.status(404).json({ error: "Post not found" });
@@ -240,7 +244,6 @@ router.delete("/delete/:id", async (req: Request, res: Response) => {
 
     await pool.query(`DELETE FROM posts WHERE id = $1`, [postId]);
 
-    // Delete the linked group (the post was its ad)
     if (groupId) {
       await pool.query(`DELETE FROM groups WHERE id = $1`, [groupId]);
     }
@@ -277,7 +280,7 @@ router.post("/:id/join", async (req: Request, res: Response) => {
     }
 
     const groupCheck = await pool.query(
-      `SELECT g.max_members, COUNT(ag.account_id)::int as member_count
+      `SELECT g.max_members, g.created_by, COUNT(ag.account_id)::int as member_count
        FROM groups g
        LEFT JOIN account_groups ag ON g.id = ag.group_id
        WHERE g.id = $1
@@ -285,7 +288,12 @@ router.post("/:id/join", async (req: Request, res: Response) => {
       [groupId],
     );
 
-    const { max_members, member_count } = groupCheck.rows[0];
+    const { max_members, member_count, created_by } = groupCheck.rows[0];
+
+    if (created_by === userId) {
+      res.status(400).json({ error: "You are the creator of this group" });
+      return;
+    }
 
     if (member_count >= max_members) {
       res.status(400).json({ error: "Group is full" });
@@ -298,14 +306,15 @@ router.post("/:id/join", async (req: Request, res: Response) => {
     );
 
     if (memberCheck.rows.length > 0) {
-      res.status(400).json({ error: "You are already a member of this group" });
+      res.status(400).json({ error: "You already have a pending or active membership" });
       return;
     }
 
-    await pool.query(`INSERT INTO account_groups (account_id, group_id) VALUES ($1, $2)`, [
-      userId,
-      groupId,
-    ]);
+    // Join as pending — creator must accept
+    await pool.query(
+      `INSERT INTO account_groups (account_id, group_id, is_pending) VALUES ($1, $2, true)`,
+      [userId, groupId],
+    );
 
     res.json({ success: true });
   } catch (error) {
@@ -345,25 +354,93 @@ router.post("/:id/leave", async (req: Request, res: Response) => {
       return;
     }
 
-    const memberCheck = await pool.query(
-      `SELECT account_id FROM account_groups WHERE account_id = $1 AND group_id = $2`,
+    await pool.query(
+      `DELETE FROM account_groups WHERE account_id = $1 AND group_id = $2`,
       [userId, groupId],
     );
-
-    if (memberCheck.rows.length === 0) {
-      res.status(400).json({ error: "You are not a member of this group" });
-      return;
-    }
-
-    await pool.query(`DELETE FROM account_groups WHERE account_id = $1 AND group_id = $2`, [
-      userId,
-      groupId,
-    ]);
 
     res.json({ success: true });
   } catch (error) {
     console.error("Failed to leave group:", error);
     res.status(500).json({ error: "Failed to leave group" });
+  }
+});
+
+// Creator accepts a pending member
+router.post("/:id/accept/:accountId", async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const postId = parseInt(req.params.id);
+  const targetId = parseInt(req.params.accountId);
+
+  if (isNaN(postId) || isNaN(targetId)) {
+    res.status(400).json({ error: "Invalid ID" });
+    return;
+  }
+
+  try {
+    const postCheck = await pool.query(`SELECT group_id FROM posts WHERE id = $1`, [postId]);
+
+    if (postCheck.rows.length === 0) {
+      res.status(404).json({ error: "Post not found" });
+      return;
+    }
+
+    const groupId = postCheck.rows[0].group_id;
+    const groupCheck = await pool.query(`SELECT created_by FROM groups WHERE id = $1`, [groupId]);
+
+    if (groupCheck.rows[0].created_by !== userId) {
+      res.status(403).json({ error: "Only the group creator can accept members" });
+      return;
+    }
+
+    await pool.query(
+      `UPDATE account_groups SET is_pending = false WHERE account_id = $1 AND group_id = $2`,
+      [targetId, groupId],
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to accept member:", error);
+    res.status(500).json({ error: "Failed to accept member" });
+  }
+});
+
+// Creator removes a member (reject pending or remove confirmed)
+router.delete("/:id/remove/:accountId", async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const postId = parseInt(req.params.id);
+  const targetId = parseInt(req.params.accountId);
+
+  if (isNaN(postId) || isNaN(targetId)) {
+    res.status(400).json({ error: "Invalid ID" });
+    return;
+  }
+
+  try {
+    const postCheck = await pool.query(`SELECT group_id FROM posts WHERE id = $1`, [postId]);
+
+    if (postCheck.rows.length === 0) {
+      res.status(404).json({ error: "Post not found" });
+      return;
+    }
+
+    const groupId = postCheck.rows[0].group_id;
+    const groupCheck = await pool.query(`SELECT created_by FROM groups WHERE id = $1`, [groupId]);
+
+    if (groupCheck.rows[0].created_by !== userId) {
+      res.status(403).json({ error: "Only the group creator can remove members" });
+      return;
+    }
+
+    await pool.query(
+      `DELETE FROM account_groups WHERE account_id = $1 AND group_id = $2`,
+      [targetId, groupId],
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to remove member:", error);
+    res.status(500).json({ error: "Failed to remove member" });
   }
 });
 

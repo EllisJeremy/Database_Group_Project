@@ -160,20 +160,20 @@ INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
     'Looking for members for agile project. Experience with Git and Scrum a plus.'
 );
 
-INSERT INTO account_groups (account_id, group_id) VALUES
-(1, 1), -- jeremy in DB Heroes (creator)
-(3, 1), -- bob in DB Heroes
-(2, 2), -- alice in DB Study Group (creator)
-(4, 2), -- carol in DB Study Group
-(3, 3), -- bob in Web Wizards (creator)
-(6, 3), -- eve in Web Wizards
-(4, 4), -- carol in Algo Squad (creator)
-(5, 4), -- dave in Algo Squad
-(5, 5), -- dave in Kernel Panic (creator)
-(7, 5), -- frank in Kernel Panic
-(2, 6), -- alice in Agile Avengers (creator)
-(1, 6), -- jeremy in Agile Avengers
-(3, 6); -- bob in Agile Avengers
+INSERT INTO account_groups (account_id, group_id, is_pending) VALUES
+(1, 1, false), -- jeremy in DB Heroes (creator)
+(3, 1, false), -- bob in DB Heroes
+(2, 2, false), -- alice in DB Study Group (creator)
+(4, 2, false), -- carol in DB Study Group
+(3, 3, false), -- bob in Web Wizards (creator)
+(6, 3, false), -- eve in Web Wizards
+(4, 4, false), -- carol in Algo Squad (creator)
+(5, 4, false), -- dave in Algo Squad
+(5, 5, false), -- dave in Kernel Panic (creator)
+(7, 5, false), -- frank in Kernel Panic
+(2, 6, false), -- alice in Agile Avengers (creator)
+(1, 6, false), -- jeremy in Agile Avengers
+(3, 6, false); -- bob in Agile Avengers
 
 -- Web Development skill-match demo
 -- Overlap relative to account id=1 (python, javascript, react)
@@ -248,10 +248,10 @@ INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
     'Enterprise backend with Java, Spring, and MySQL.'
 );
 
-INSERT INTO account_groups (account_id, group_id) VALUES
-(8, 7),
-(9, 7),
-(10, 8),
-(11, 8),
-(12, 9),
-(13, 9);
+INSERT INTO account_groups (account_id, group_id, is_pending) VALUES
+(8, 7, false),
+(9, 7, false),
+(10, 8, false),
+(11, 8, false),
+(12, 9, false),
+(13, 9, false);

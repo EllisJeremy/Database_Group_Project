@@ -10,6 +10,7 @@ export interface MemberSkill {
 export interface GroupMember {
   account_id: number;
   name: string;
+  is_pending: boolean;
   skills: MemberSkill[];
 }
 
@@ -43,6 +44,8 @@ interface PostsState {
   deletePost: (id: number) => Promise<void>;
   joinGroup: (postId: number) => Promise<void>;
   leaveGroup: (postId: number) => Promise<void>;
+  acceptMember: (postId: number, accountId: number) => Promise<void>;
+  removeMember: (postId: number, accountId: number) => Promise<void>;
 }
 
 export const usePostsStore = create<PostsState>((set, get) => ({
@@ -95,6 +98,18 @@ export const usePostsStore = create<PostsState>((set, get) => ({
 
   leaveGroup: async (postId) => {
     await api.post(`posts/${postId}/leave`, {});
+    const classId = get().posts.find((p) => p.id === postId)?.class_id;
+    if (classId) await get().fetchPosts(classId);
+  },
+
+  acceptMember: async (postId, accountId) => {
+    await api.post(`posts/${postId}/accept/${accountId}`, {});
+    const classId = get().posts.find((p) => p.id === postId)?.class_id;
+    if (classId) await get().fetchPosts(classId);
+  },
+
+  removeMember: async (postId, accountId) => {
+    await api.delete(`posts/${postId}/remove/${accountId}`);
     const classId = get().posts.find((p) => p.id === postId)?.class_id;
     if (classId) await get().fetchPosts(classId);
   },

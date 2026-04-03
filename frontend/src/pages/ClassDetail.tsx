@@ -26,8 +26,17 @@ export default function ClassDetail() {
   const { id } = useParams<{ id: string }>();
   const classId = Number(id);
   const navigate = useNavigate();
-  const { posts, fetchPosts, createPost, updatePost, deletePost, joinGroup, leaveGroup } =
-    usePostsStore();
+  const {
+    posts,
+    fetchPosts,
+    createPost,
+    updatePost,
+    deletePost,
+    joinGroup,
+    leaveGroup,
+    acceptMember,
+    removeMember,
+  } = usePostsStore();
   const { classes, fetchClasses, deleteClass } = useClassesStore();
   const { userSkills, fetchUserSkills } = useSkillsStore();
   const user = useAuthStore((s) => s.user);
@@ -211,6 +220,8 @@ export default function ClassDetail() {
             onEdit={() => openEdit(post)}
             onDelete={() => deletePost(post.id)}
             onGroupAction={handleGroupAction}
+            onAccept={(accountId) => acceptMember(post.id, accountId)}
+            onRemove={(accountId) => removeMember(post.id, accountId)}
           />
         ))}
         {posts.length === 0 && (
@@ -442,6 +453,8 @@ function PostCard({
   onEdit,
   onDelete,
   onGroupAction,
+  onAccept,
+  onRemove,
 }: {
   post: Post;
   isAuthor: boolean;
@@ -450,11 +463,16 @@ function PostCard({
   onEdit: () => void;
   onDelete: () => void;
   onGroupAction: (postId: number, action: "join" | "leave") => void;
+  onAccept: (accountId: number) => void;
+  onRemove: (accountId: number) => void;
 }) {
   const group = post.group;
-  const isMember = group?.members?.some((m) => m.account_id === userId);
+  const myMembership = group?.members?.find((m) => m.account_id === userId);
+  const isMember = !!myMembership;
+  const isPending = myMembership?.is_pending ?? false;
   const isGroupOwner = group?.created_by === userId;
-  const isFull = group ? group.members.length >= group.max_members : false;
+  const confirmedCount = group?.members.filter((m) => !m.is_pending).length ?? 0;
+  const isFull = group ? confirmedCount >= group.max_members : false;
   const matchScore = post.skill_match_score ?? 0;
 
   return (
@@ -479,8 +497,30 @@ function PostCard({
             {post.description}
           </span>
         </div>
-        {isAuthor && (
-          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div
+              style={{
+                width: 22,
+                height: 22,
+                background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ fontSize: 8, fontWeight: 700, color: "white" }}>
+                {(post.author_name || "?").slice(0, 2).toUpperCase()}
+              </span>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>
+              {post.author_name || "Unknown"}
+            </span>
+            <span style={{ fontSize: 12, color: "#a1a1aa" }}>&middot; {timeAgo(post.created_at)}</span>
+          </div>
+          {isAuthor && (
+          <div style={{ display: "flex", gap: 6 }}>
             <button
               onClick={onEdit}
               style={{
@@ -514,7 +554,8 @@ function PostCard({
               Delete
             </button>
           </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Inline group */}
@@ -587,10 +628,7 @@ function PostCard({
           {group.members.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {group.members.map((member, idx) => (
-                <div
-                  key={member.account_id}
-                  style={{ display: "flex", flexDirection: "column", gap: 5 }}
-                >
+                <div key={member.account_id} style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <div
                       style={{
@@ -602,15 +640,39 @@ function PostCard({
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
+                        opacity: member.is_pending ? 0.5 : 1,
                       }}
                     >
                       <span style={{ fontSize: 7, fontWeight: 700, color: "white" }}>
                         {member.name.slice(0, 2).toUpperCase()}
                       </span>
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: member.is_pending ? "#a1a1aa" : "#27272a" }}>
                       {member.name}
                     </span>
+                    {member.is_pending && (
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)", padding: "1px 7px", borderRadius: 10 }}>
+                        Pending
+                      </span>
+                    )}
+                    {isGroupOwner && member.account_id !== userId && (
+                      <div style={{ display: "flex", gap: 4, marginLeft: "auto" }}>
+                        {member.is_pending && (
+                          <button
+                            onClick={() => onAccept(member.account_id)}
+                            style={{ padding: "2px 10px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#16a34a", fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif' }}
+                          >
+                            Accept
+                          </button>
+                        )}
+                        <button
+                          onClick={() => onRemove(member.account_id)}
+                          style={{ padding: "2px 10px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#dc2626", fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif' }}
+                        >
+                          {member.is_pending ? "Reject" : "Remove"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                   {member.skills.length > 0 && (
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap", paddingLeft: 26 }}>
@@ -626,9 +688,7 @@ function PostCard({
                               fontWeight: 600,
                               background: isMatch ? "rgba(79,70,229,0.1)" : "#f4f4f5",
                               color: isMatch ? "#4f46e5" : "#71717a",
-                              border: isMatch
-                                ? "1px solid rgba(79,70,229,0.3)"
-                                : "1px solid transparent",
+                              border: isMatch ? "1px solid rgba(79,70,229,0.3)" : "1px solid transparent",
                             }}
                           >
                             {skill.name}
@@ -643,8 +703,8 @@ function PostCard({
           )}
 
           {/* Join/Leave */}
-          {!isGroupOwner &&
-            (isMember ? (
+          {!isGroupOwner && (
+            isMember ? (
               <button
                 onClick={() => onGroupAction(post.id, "leave")}
                 style={{
@@ -660,7 +720,7 @@ function PostCard({
                   fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
                 }}
               >
-                Leave Group
+                {isPending ? "Cancel Request" : "Leave Group"}
               </button>
             ) : (
               <button
@@ -681,7 +741,8 @@ function PostCard({
               >
                 {isFull ? "Group Full" : "Join Group"}
               </button>
-            ))}
+            )
+          )}
           {isGroupOwner && (
             <span style={{ fontSize: 12, color: "#7c3aed", fontWeight: 500 }}>
               You own this group
@@ -690,36 +751,6 @@ function PostCard({
         </div>
       )}
 
-      {/* Footer */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          paddingTop: 4,
-          borderTop: "1px solid #f4f4f5",
-        }}
-      >
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            background: "linear-gradient(135deg, #6366f1, #a855f7)",
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span style={{ fontSize: 9, fontWeight: 700, color: "white" }}>
-            {(post.author_name || "?").slice(0, 2).toUpperCase()}
-          </span>
-        </div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>
-          {post.author_name || "Unknown"}
-        </span>
-        <span style={{ fontSize: 12, color: "#a1a1aa" }}>&middot; {timeAgo(post.created_at)}</span>
-      </div>
     </div>
   );
 }
