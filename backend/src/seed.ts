@@ -4,7 +4,7 @@ import { env } from "./setup/env";
 
 export default async function seed() {
   const password = env.ADMIN_PASSWORD;
-  const email = "jeremyellis@vt.edu";
+  const email = env.ADMIN_EMAIL;
   const name = "admin";
   const isAdmin = true;
   const obfuscatedPassword = await bcrypt.hash(password, 10);

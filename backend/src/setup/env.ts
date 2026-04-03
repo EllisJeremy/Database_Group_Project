@@ -25,6 +25,7 @@ export const env = {
   JWT_SECRET: getEnv("JWT_SECRET"),
 
   ADMIN_PASSWORD: getEnv("ADMIN_PASSWORD"),
+  ADMIN_EMAIL: getEnv("ADMIN_EMAIL"),
 
   DATABASE_PORT: getEnvNumber("DATABASE_PORT"),
   DATABASE_USER: getEnv("DATABASE_USER"),
