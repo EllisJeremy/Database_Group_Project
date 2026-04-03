@@ -615,7 +615,7 @@ function PostCard({
                   {member.skills.length > 0 && (
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap", paddingLeft: 26 }}>
                       {member.skills.map((skill) => {
-                        const isMatch = userSkillIds.has(skill.id);
+                        const isMatch = userSkillIds.has(skill.id) && member.account_id !== userId;
                         return (
                           <span
                             key={skill.id}

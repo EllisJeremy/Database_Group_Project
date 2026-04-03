@@ -1,12 +1,40 @@
 INSERT INTO accounts (email, password_hash, name)
 VALUES
-('jeremy@example.com', 'Hash1', 'jeremy'),
-('alice@gmail.com', 'Hash2', 'alice'),
-('bob@icloud.com', 'Hash3', 'bob'),
-('carol@example.com', 'Hash4', 'carol'),
-('dave@example.com', 'Hash5', 'dave'),
-('eve@example.com', 'Hash6', 'eve'),
-('frank@example.com', 'Hash7', 'frank');
+(
+    'jeremy@example.com',
+    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC',
+    'jeremy'
+),
+(
+    'alice@gmail.com',
+    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC',
+    'alice'
+),
+(
+    'bob@icloud.com',
+    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC',
+    'bob'
+),
+(
+    'carol@example.com',
+    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC',
+    'carol'
+),
+(
+    'dave@example.com',
+    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC',
+    'dave'
+),
+(
+    'eve@example.com',
+    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC',
+    'eve'
+),
+(
+    'frank@example.com',
+    '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC',
+    'frank'
+);
 
 INSERT INTO skills (name, type) VALUES
 -- language
@@ -89,12 +117,48 @@ INSERT INTO groups (class_id, group_name, max_members, created_by) VALUES
 (5, 'Agile Avengers', 4, 2);
 
 INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
-(1, 1, 1, 'Looking for DB project partners', 'Need 2 more people for the final project. We are using PostgreSQL and Python.'),
-(1, 2, 2, 'Study group for midterm', 'Reviewing indexing and transactions. Open to all levels.'),
-(2, 3, 3, 'React frontend partner needed', 'Building a full stack app with React and Express. Need 2 more.'),
-(3, 4, 4, 'Algorithm study group', 'Covering dynamic programming and graph algorithms this week.'),
-(4, 5, 5, 'OS project group', 'Working on the scheduler project. Looking for systems programmers.'),
-(5, 2, 6, 'SE team forming', 'Looking for members for agile project. Experience with Git and Scrum a plus.');
+(
+    1,
+    1,
+    1,
+    'Looking for DB project partners',
+    'Need 2 more people for the final project. We are using PostgreSQL and Python.'
+),
+(
+    1,
+    2,
+    2,
+    'Study group for midterm',
+    'Reviewing indexing and transactions. Open to all levels.'
+),
+(
+    2,
+    3,
+    3,
+    'React frontend partner needed',
+    'Building a full stack app with React and Express. Need 2 more.'
+),
+(
+    3,
+    4,
+    4,
+    'Algorithm study group',
+    'Covering dynamic programming and graph algorithms this week.'
+),
+(
+    4,
+    5,
+    5,
+    'OS project group',
+    'Working on the scheduler project. Looking for systems programmers.'
+),
+(
+    5,
+    2,
+    6,
+    'SE team forming',
+    'Looking for members for agile project. Experience with Git and Scrum a plus.'
+);
 
 INSERT INTO account_groups (account_id, group_id) VALUES
 (1, 1), -- jeremy in DB Heroes (creator)
@@ -162,9 +226,27 @@ INSERT INTO groups (class_id, group_name, max_members, created_by) VALUES
 (2, 'Backend Masters', 4, 12);
 
 INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
-(2, 8, 7, 'React + Node app — need 2 more!', 'Full-stack with React and Node. Big on JS and TypeScript.'),
-(2, 10, 8, 'Full stack team forming', 'TypeScript frontend, Python backend. Need versatile devs.'),
-(2, 12, 9, 'Java Spring Boot backend group', 'Enterprise backend with Java, Spring, and MySQL.');
+(
+    2,
+    8,
+    7,
+    'React + Node app — need 2 more!',
+    'Full-stack with React and Node. Big on JS and TypeScript.'
+),
+(
+    2,
+    10,
+    8,
+    'Full stack team forming',
+    'TypeScript frontend, Python backend. Need versatile devs.'
+),
+(
+    2,
+    12,
+    9,
+    'Java Spring Boot backend group',
+    'Enterprise backend with Java, Spring, and MySQL.'
+);
 
 INSERT INTO account_groups (account_id, group_id) VALUES
 (8, 7),

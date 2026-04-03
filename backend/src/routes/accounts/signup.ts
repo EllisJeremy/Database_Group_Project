@@ -11,7 +11,7 @@ router.post("/", async (req: Request, res: Response) => {
 
   try {
     const obfuscatedPassword = await bcrypt.hash(password, 10);
-
+    console.log(obfuscatedPassword);
     const { rows } = await pool.query(
       `INSERT INTO accounts (email, password_hash, name)
       VALUES ($1, $2, $3)

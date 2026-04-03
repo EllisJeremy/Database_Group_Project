@@ -4,7 +4,9 @@ import { requireAuth } from "../../middleware/requireAuth";
 
 const router = Router();
 
-router.get("", requireAuth, async (req: Request, res: Response) => {
+router.use(requireAuth);
+
+router.get("", async (req: Request, res: Response) => {
   const { class_id } = req.query;
   const userId = req.user.id;
 
@@ -29,6 +31,7 @@ router.get("", requireAuth, async (req: Request, res: Response) => {
             JOIN account_skills ags2 ON ag2.account_id = ags2.account_id
             JOIN user_skills us ON ags2.skill_id = us.skill_id
             WHERE ag2.group_id = g.id
+            AND ag2.account_id != $1
           ), 0) as skill_match_score
         FROM posts p
         JOIN accounts a ON p.author_id = a.id
