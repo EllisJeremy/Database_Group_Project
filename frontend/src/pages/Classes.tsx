@@ -17,10 +17,11 @@ function getColor(id: number) {
 }
 
 export default function Classes() {
-  const { classes, fetchClasses, createClass, deleteClass } = useClassesStore();
+  const { classes, fetchClasses, createClass, updateClass, deleteClass } = useClassesStore();
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
+  const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [name, setName] = useState("");
   const [section, setSection] = useState("");
   const [search, setSearch] = useState("");
@@ -45,6 +46,24 @@ export default function Classes() {
     } catch (e: any) {
       alert(e.message || "Failed to create class");
     }
+  };
+
+  const handleUpdate = async () => {
+    if (!editingClass || !name.trim() || !section.trim()) return;
+    try {
+      await updateClass(editingClass.id, { name: name.trim(), section: section.trim() });
+      setEditingClass(null);
+      setName("");
+      setSection("");
+    } catch (e: any) {
+      alert(e.message || "Failed to update class");
+    }
+  };
+
+  const openEdit = (cls: Class) => {
+    setEditingClass(cls);
+    setName(cls.name);
+    setSection(cls.section);
   };
 
   return (
@@ -114,6 +133,53 @@ export default function Classes() {
           boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
         }}
       />
+
+      {/* Edit Modal */}
+      {editingClass && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(17,17,24,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}
+          onClick={() => setEditingClass(null)}
+        >
+          <div
+            style={{ width: 480, background: "white", borderRadius: 16, padding: 36, display: "flex", flexDirection: "column", gap: 24, boxShadow: "0 24px 80px rgba(0,0,0,0.2)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontSize: 22, fontWeight: 700, color: "#111118" }}>Edit Class</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>Class Name</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={{ height: 48, background: "#fafafb", border: "1.5px solid #e4e4e7", borderRadius: 10, padding: "0 16px", fontSize: 14, fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif', outline: "none" }}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#27272a" }}>Section</label>
+                <input
+                  value={section}
+                  onChange={(e) => setSection(e.target.value)}
+                  style={{ height: 48, background: "#fafafb", border: "1.5px solid #e4e4e7", borderRadius: 10, padding: "0 16px", fontSize: 14, fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif', outline: "none" }}
+                />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", paddingTop: 8, borderTop: "1px solid #f4f4f5" }}>
+              <button
+                onClick={() => setEditingClass(null)}
+                style={{ height: 44, padding: "0 24px", background: "#f4f4f5", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#52525b", fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                style={{ height: 44, padding: "0 28px", background: "linear-gradient(135deg, #4f46e5, #7c3aed)", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "white", fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif' }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Modal */}
       {showCreate && (
@@ -239,6 +305,7 @@ export default function Classes() {
             cls={c}
             isOwner={user?.id === c.creator_id}
             onView={() => navigate(`/class/${c.id}`)}
+            onEdit={() => openEdit(c)}
             onDelete={() => deleteClass(c.id)}
           />
         ))}
@@ -256,11 +323,13 @@ function ClassCard({
   cls,
   isOwner,
   onView,
+  onEdit,
   onDelete,
 }: {
   cls: Class;
   isOwner: boolean;
   onView: () => void;
+  onEdit: () => void;
   onDelete: () => void;
 }) {
   return (
@@ -351,23 +420,42 @@ function ClassCard({
           View Posts
         </button>
         {isOwner && (
-          <button
-            onClick={onDelete}
-            style={{
-              height: 40,
-              padding: "0 16px",
-              background: "#fef2f2",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#dc2626",
-              fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
-            }}
-          >
-            Delete
-          </button>
+          <>
+            <button
+              onClick={onEdit}
+              style={{
+                height: 40,
+                padding: "0 16px",
+                background: "#f4f4f5",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#27272a",
+                fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+              }}
+            >
+              Edit
+            </button>
+            <button
+              onClick={onDelete}
+              style={{
+                height: 40,
+                padding: "0 16px",
+                background: "#fef2f2",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#dc2626",
+                fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+              }}
+            >
+              Delete
+            </button>
+          </>
         )}
       </div>
     </div>
