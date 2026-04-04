@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 export async function sendEmail(to: string, subject: string, text: string, html?: string) {
   return transporter.sendMail({
-    from: `"The Orchard" <${env.EMAIL}>`,
+    from: `"Teammate Finder" <${env.EMAIL}>`,
     to,
     subject,
     text,
