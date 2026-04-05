@@ -62,3 +62,9 @@ CREATE TABLE account_groups (
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (account_id, group_id)
 );
+
+CREATE TABLE password_reset_tokens (
+    token TEXT PRIMARY KEY,
+    account_id INT REFERENCES accounts (id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL
+);
