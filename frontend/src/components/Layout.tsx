@@ -8,6 +8,7 @@ const navItems = [
 
 export default function Layout() {
   const user = useAuthStore((s) => s.user);
+  const adminNavItem = { to: "/admin", label: "Admin", icon: "⬡" };
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -53,7 +54,7 @@ export default function Layout() {
 
         {/* Nav */}
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          {navItems.map((item) => (
+          {[...navItems, ...(user?.isAdmin ? [adminNavItem] : [])].map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

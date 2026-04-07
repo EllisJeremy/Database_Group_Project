@@ -304,6 +304,7 @@ export default function Classes() {
             key={c.id}
             cls={c}
             isOwner={user?.id === c.creator_id}
+            isAdmin={user?.isAdmin ?? false}
             onView={() => navigate(`/class/${c.id}`)}
             onEdit={() => openEdit(c)}
             onDelete={() => deleteClass(c.id)}
@@ -322,12 +323,14 @@ export default function Classes() {
 function ClassCard({
   cls,
   isOwner,
+  isAdmin,
   onView,
   onEdit,
   onDelete,
 }: {
   cls: Class;
   isOwner: boolean;
+  isAdmin: boolean;
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -419,7 +422,7 @@ function ClassCard({
         >
           View Posts
         </button>
-        {isOwner && (
+        {(isOwner || isAdmin) && (
           <>
             <button
               onClick={onEdit}

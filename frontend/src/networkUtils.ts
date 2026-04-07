@@ -88,4 +88,8 @@ export const endpoints = {
 
   // Logout
   logout: () => post("/accounts/logout", {}),
+
+  // Admin
+  getUsers: () => get("/admin/users"),
+  makeAdmin: (id: number) => put(`/admin/users/${id}/make-admin`, {}),
 };

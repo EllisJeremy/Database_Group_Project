@@ -50,6 +50,7 @@ export default function ClassDetail() {
 
   const cls = classes.find((c) => c.id === classId);
   const isOwner = user?.id === cls?.creator_id;
+  const isAdmin = user?.isAdmin ?? false;
   const userSkillIds = new Set(userSkills.map((s) => s.id));
 
   useEffect(() => {
@@ -186,7 +187,7 @@ export default function ClassDetail() {
             <span style={{ fontSize: 18, fontWeight: 300 }}>+</span>
             New Post
           </button>
-          {isOwner && (
+          {(isOwner || isAdmin) && (
             <button
               onClick={handleDeleteClass}
               style={{
@@ -215,6 +216,7 @@ export default function ClassDetail() {
             key={post.id}
             post={post}
             isAuthor={user?.id === post.author_id}
+            isAdmin={isAdmin}
             userId={user?.id}
             userSkillIds={userSkillIds}
             onEdit={() => openEdit(post)}
@@ -448,6 +450,7 @@ export default function ClassDetail() {
 function PostCard({
   post,
   isAuthor,
+  isAdmin,
   userId,
   userSkillIds,
   onEdit,
@@ -458,6 +461,7 @@ function PostCard({
 }: {
   post: Post;
   isAuthor: boolean;
+  isAdmin: boolean;
   userId?: number;
   userSkillIds: Set<number>;
   onEdit: () => void;
@@ -519,7 +523,7 @@ function PostCard({
             </span>
             <span style={{ fontSize: 12, color: "#a1a1aa" }}>&middot; {timeAgo(post.created_at)}</span>
           </div>
-          {isAuthor && (
+          {(isAuthor || isAdmin) && (
           <div style={{ display: "flex", gap: 6 }}>
             <button
               onClick={onEdit}

@@ -235,7 +235,7 @@ router.delete("/delete/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    if (postCheck.rows[0].author_id !== userId) {
+    if (postCheck.rows[0].author_id !== userId && !req.user.isAdmin) {
       res.status(403).json({ error: "You can only delete your own posts" });
       return;
     }

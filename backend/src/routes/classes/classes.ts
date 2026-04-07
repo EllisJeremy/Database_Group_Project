@@ -121,7 +121,7 @@ router.delete("/delete/:id", requireAuth, async (req: Request, res: Response) =>
       return;
     }
 
-    if (classCheck.rows[0].creator_id !== userId) {
+    if (classCheck.rows[0].creator_id !== userId && !req.user.isAdmin) {
       res.status(403).json({ error: "You can only delete your own classes" });
       return;
     }

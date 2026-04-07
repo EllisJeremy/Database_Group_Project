@@ -8,6 +8,7 @@ import accounts from "./routes/accounts/accountsIndex.js";
 import skills from "./routes/skills/skills.js";
 import classes from "./routes/classes/classes.js";
 import posts from "./routes/posts/posts.js";
+import admin from "./routes/admin/admin.js";
 import seed from "./seed.js";
 
 const port = process.env.PORT || 8080;
@@ -39,5 +40,6 @@ app.use("/health", health);
 app.use("/skills", skills);
 app.use("/classes", classes);
 app.use("/posts", posts);
+app.use("/admin", admin);
 
 app.listen(port);
