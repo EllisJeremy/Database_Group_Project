@@ -8,6 +8,7 @@ const navItems = [
 
 export default function Layout() {
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const adminNavItem = { to: "/admin", label: "Admin", icon: "⬡" };
   const initials = user?.name
     ? user.name
@@ -96,12 +97,42 @@ export default function Layout() {
             >
               <span style={{ fontSize: 11, fontWeight: 700, color: "white" }}>{initials}</span>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#e4e4e7" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 1, flex: 1, minWidth: 0 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#e4e4e7", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {user?.name ?? "Guest"}
               </span>
-              <span style={{ fontSize: 11, color: "#52525b" }}>{user?.email ?? ""}</span>
+              <span style={{ fontSize: 11, color: "#52525b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.email ?? ""}</span>
             </div>
+            <button
+              onClick={logout}
+              title="Logout"
+              style={{
+                flexShrink: 0,
+                width: 28,
+                height: 28,
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 7,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#52525b",
+                fontSize: 14,
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = "rgba(220,38,38,0.1)";
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(220,38,38,0.3)";
+                (e.currentTarget as HTMLButtonElement).style.color = "#dc2626";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)";
+                (e.currentTarget as HTMLButtonElement).style.color = "#52525b";
+              }}
+            >
+              ↪
+            </button>
           </div>
         </div>
       </div>
