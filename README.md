@@ -1,12 +1,13 @@
 # Project
 
+This is the repo for the CS 4604 group project. Follow the insturctions below to get it running locally.
+
 \
 Install prettier vsc extension for formatting:
 
-```
 https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
-```
 
+\
 Install Node.js
 
 # Frontend
@@ -28,10 +29,9 @@ npm run dev
 
 You must install the Docker desktop app
 
-## local:
+https://www.docker.com/products/docker-desktop/
 
-to get an env
-
+\
 To install dependencies
 
 ```
@@ -39,6 +39,7 @@ npm ci
 ```
 
 \
+to get an env
 
 ```
 npm run env
