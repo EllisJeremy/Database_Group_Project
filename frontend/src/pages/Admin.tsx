@@ -12,12 +12,13 @@ interface AdminUser {
 export default function Admin() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [promoting, setPromoting] = useState<number | null>(null);
 
   useEffect(() => {
     api.get<{ success: boolean; users: AdminUser[] }>("/admin/users")
       .then((data) => setUsers(data.users))
-      .catch(console.error)
+      .catch((e) => setError(e.message ?? "Failed to load users"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -72,6 +73,8 @@ export default function Admin() {
       >
         {loading ? (
           <div style={{ padding: 32, color: "#a1a1aa", fontSize: 14 }}>Loading users...</div>
+        ) : error ? (
+          <div style={{ padding: 32, color: "#dc2626", fontSize: 14 }}>{error}</div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
