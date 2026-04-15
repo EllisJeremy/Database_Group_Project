@@ -255,7 +255,7 @@ INSERT INTO account_groups (account_id, group_id, is_pending) VALUES
 (11, 8, false),
 (12, 9, false),
 (13, 9, false);
-
+/*
 -- Expand each table to 20 tuples
 
 -- accounts: add 7 more (IDs 14-20)
@@ -317,3 +317,6 @@ INSERT INTO posts (class_id, author_id, group_id, title, description) VALUES
 -- account_groups: add 1 more (reaches 20)
 INSERT INTO account_groups (account_id, group_id, is_pending) VALUES
 (14, 10, false);
+
+
+*/
