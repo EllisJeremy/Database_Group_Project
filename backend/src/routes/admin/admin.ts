@@ -7,7 +7,6 @@ const router = Router();
 
 router.use(requireAuth, requireAdmin);
 
-// Get all users
 router.get("/users", async (_req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(`
@@ -22,7 +21,6 @@ router.get("/users", async (_req: Request, res: Response) => {
   }
 });
 
-// Promote a user to admin
 router.put("/users/:id/make-admin", async (req: Request, res: Response) => {
   const targetId = parseInt(req.params.id);
 

@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
-import { api } from "../networkUtils";
-
-interface AdminUser {
-  id: number;
-  email: string;
-  name: string;
-  is_admin: boolean;
-  created_at: string;
-}
+import { endpoints } from "../networkUtils";
+import type { AdminUser } from "../networkUtils";
 
 export default function Admin() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -16,7 +9,8 @@ export default function Admin() {
   const [promoting, setPromoting] = useState<number | null>(null);
 
   useEffect(() => {
-    api.get<{ success: boolean; users: AdminUser[] }>("/admin/users")
+    endpoints
+      .getUsers()
       .then((data) => setUsers(data.users))
       .catch((e) => setError(e.message ?? "Failed to load users"))
       .finally(() => setLoading(false));
@@ -25,10 +19,8 @@ export default function Admin() {
   const handleMakeAdmin = async (userId: number) => {
     setPromoting(userId);
     try {
-      await api.put(`/admin/users/${userId}/make-admin`, {});
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, is_admin: true } : u)),
-      );
+      await endpoints.makeAdmin(userId);
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_admin: true } : u)));
     } catch (e: any) {
       alert(e.message || "Failed to promote user");
     } finally {
@@ -38,7 +30,6 @@ export default function Admin() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-      {/* Header */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <span
           style={{
@@ -62,7 +53,6 @@ export default function Admin() {
         </span>
       </div>
 
-      {/* Users Table */}
       <div
         style={{
           background: "white",
@@ -141,7 +131,9 @@ export default function Admin() {
                         fontWeight: 600,
                         background: u.is_admin ? "rgba(79,70,229,0.08)" : "#f4f4f5",
                         color: u.is_admin ? "#4f46e5" : "#71717a",
-                        border: u.is_admin ? "1px solid rgba(79,70,229,0.2)" : "1px solid transparent",
+                        border: u.is_admin
+                          ? "1px solid rgba(79,70,229,0.2)"
+                          : "1px solid transparent",
                       }}
                     >
                       {u.is_admin ? "Admin" : "User"}
@@ -157,7 +149,10 @@ export default function Admin() {
                         disabled={promoting === u.id}
                         style={{
                           padding: "6px 14px",
-                          background: promoting === u.id ? "#f4f4f5" : "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                          background:
+                            promoting === u.id
+                              ? "#f4f4f5"
+                              : "linear-gradient(135deg, #4f46e5, #7c3aed)",
                           border: "none",
                           borderRadius: 8,
                           cursor: promoting === u.id ? "default" : "pointer",

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { api } from "../networkUtils";
+import { endpoints } from "../networkUtils";
 
 export interface Skill {
   id: number;
@@ -24,7 +24,7 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
 
   fetchAllSkills: async () => {
     try {
-      const data = await api.get<{ skills: Skill[] }>("skills");
+      const data = await endpoints.getAllSkills() as { skills: Skill[] };
       set({ allSkills: data.skills });
     } catch (e) {
       console.error("Failed to fetch skills", e);
@@ -34,7 +34,7 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
   fetchUserSkills: async () => {
     set({ loading: true });
     try {
-      const data = await api.get<{ skills: Skill[] }>("accounts/skills");
+      const data = await endpoints.getUserSkills() as { skills: Skill[] };
       set({ userSkills: data.skills });
     } catch (e) {
       console.error("Failed to fetch user skills", e);
@@ -44,12 +44,12 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
   },
 
   addSkills: async (skillIds) => {
-    await api.post("accounts/skills/add", { skillIds });
+    await endpoints.addUserSkills(skillIds);
     await get().fetchUserSkills();
   },
 
   removeSkills: async (skillIds) => {
-    await api.post("accounts/skills/delete", { skillIds });
+    await endpoints.removeUserSkills(skillIds);
     await get().fetchUserSkills();
   },
 }));

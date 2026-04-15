@@ -1,6 +1,5 @@
 import { create } from "zustand";
-import { type User, signup, login, loginMe } from "../networkUtils.ts";
-import { api } from "../networkUtils.ts";
+import { type User, endpoints } from "../networkUtils.ts";
 
 interface AuthState {
   user: User | null;
@@ -14,24 +13,24 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
 
   signup: async (email, password, name) => {
-    const data = await signup(email, password, name);
+    const data = await endpoints.signup(email, password, name);
     console.log(data.user);
     set({ user: data.user });
   },
 
   login: async (email, password) => {
-    const data = await login(email, password);
+    const data = await endpoints.login(email, password);
     set({ user: data.user });
   },
 
   logout: async () => {
-    await api.post("accounts/logout", {});
+    await endpoints.logout();
     set({ user: null });
   },
 
   checkAuth: async () => {
     try {
-      const data = await loginMe();
+      const data = await endpoints.loginMe();
       set({ user: data.user });
     } catch {
       set({ user: null });

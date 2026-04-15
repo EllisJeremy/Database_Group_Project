@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { api } from "../networkUtils";
+import { endpoints } from "../networkUtils";
 
 export interface MemberSkill {
   id: number;
@@ -55,8 +55,7 @@ export const usePostsStore = create<PostsState>((set, get) => ({
   fetchPosts: async (classId?) => {
     set({ loading: true });
     try {
-      const path = classId ? `posts?class_id=${classId}` : "posts";
-      const data = await api.get<{ posts: Post[] }>(path);
+      const data = await endpoints.getPosts(classId) as { posts: Post[] };
       set({ posts: data.posts });
     } catch (e) {
       console.error("Failed to fetch posts", e);
@@ -66,17 +65,12 @@ export const usePostsStore = create<PostsState>((set, get) => ({
   },
 
   createPost: async (classId, title, description, groupName?, maxMembers?) => {
-    await api.post("posts/add", {
-      class_id: classId,
-      title,
-      description,
-      ...(groupName ? { group_name: groupName, max_members: maxMembers ?? 4 } : {}),
-    });
+    await endpoints.createPost(classId, title, description, groupName, maxMembers);
     await get().fetchPosts(classId);
   },
 
   updatePost: async (id, data) => {
-    await api.put(`posts/update/${id}`, data);
+    await endpoints.updatePost(id, data);
     const currentPosts = get().posts;
     if (currentPosts.length > 0) {
       await get().fetchPosts(currentPosts[0]?.class_id);
@@ -84,32 +78,31 @@ export const usePostsStore = create<PostsState>((set, get) => ({
   },
 
   deletePost: async (id) => {
-    const currentPosts = get().posts;
-    const classId = currentPosts.find((p) => p.id === id)?.class_id;
-    await api.delete(`posts/delete/${id}`);
+    const classId = get().posts.find((p) => p.id === id)?.class_id;
+    await endpoints.deletePost(id);
     if (classId) await get().fetchPosts(classId);
   },
 
   joinGroup: async (postId) => {
-    await api.post(`posts/${postId}/join`, {});
+    await endpoints.joinGroup(postId);
     const classId = get().posts.find((p) => p.id === postId)?.class_id;
     if (classId) await get().fetchPosts(classId);
   },
 
   leaveGroup: async (postId) => {
-    await api.post(`posts/${postId}/leave`, {});
+    await endpoints.leaveGroup(postId);
     const classId = get().posts.find((p) => p.id === postId)?.class_id;
     if (classId) await get().fetchPosts(classId);
   },
 
   acceptMember: async (postId, accountId) => {
-    await api.post(`posts/${postId}/accept/${accountId}`, {});
+    await endpoints.acceptMember(postId, accountId);
     const classId = get().posts.find((p) => p.id === postId)?.class_id;
     if (classId) await get().fetchPosts(classId);
   },
 
   removeMember: async (postId, accountId) => {
-    await api.delete(`posts/${postId}/remove/${accountId}`);
+    await endpoints.removeMember(postId, accountId);
     const classId = get().posts.find((p) => p.id === postId)?.class_id;
     if (classId) await get().fetchPosts(classId);
   },

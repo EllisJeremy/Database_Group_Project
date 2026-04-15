@@ -31,6 +31,14 @@ export const api = {
   delete: <T>(path: string) => request<T>(path, "DELETE"),
 };
 
+export interface AdminUser {
+  id: number;
+  email: string;
+  name: string;
+  is_admin: boolean;
+  created_at: string;
+}
+
 export interface User {
   id: number;
   email: string;
@@ -44,14 +52,14 @@ interface AuthResponse {
 }
 
 export const signup = (email: string, password: string, name: string) =>
-  api.post<AuthResponse>("accounts/signup", { email, password, name });
+  api.post<AuthResponse>("/accounts/signup", { email, password, name });
 
 export const login = (email: string, password: string) =>
-  api.post<AuthResponse>("accounts/login", { email, password });
+  api.post<AuthResponse>("/accounts/login", { email, password });
 
-export const loginMe = () => api.get<AuthResponse>("accounts/login/me");
+export const loginMe = () => api.get<AuthResponse>("/accounts/login/me");
 
-export const getUserSkills = () => api.get("accounts/skills");
+export const getUserSkills = () => api.get("/accounts/skills");
 
 const get = <T>(path: string) => api.get<T>(path);
 const post = <T>(path: string, body: unknown) => api.post<T>(path, body);
@@ -59,11 +67,12 @@ const put = <T>(path: string, body: unknown) => api.put<T>(path, body);
 const del = <T>(path: string) => api.delete<T>(path);
 
 export const endpoints = {
-  // Auth (existing)
+  // Auth
   signup: (email: string, password: string, name: string) =>
-    post("/accounts/signup", { email, password, name }),
-  login: (email: string, password: string) => post("/accounts/login", { email, password }),
-  loginMe: () => get("/accounts/login/me"),
+    post<AuthResponse>("/accounts/signup", { email, password, name }),
+  login: (email: string, password: string) =>
+    post<AuthResponse>("/accounts/login", { email, password }),
+  loginMe: () => get<AuthResponse>("/accounts/login/me"),
 
   // Classes
   getClasses: () => get("/classes"),
@@ -74,11 +83,27 @@ export const endpoints = {
 
   // Posts
   getPosts: (classId?: number) => get(classId ? `/posts?class_id=${classId}` : "/posts"),
-  createPost: (class_id: number, title: string, description: string) =>
-    post("/posts/add", { class_id, title, description }),
+  createPost: (
+    class_id: number,
+    title: string,
+    description: string,
+    groupName?: string,
+    maxMembers?: number,
+  ) =>
+    post("/posts/add", {
+      class_id,
+      title,
+      description,
+      ...(groupName ? { group_name: groupName, max_members: maxMembers ?? 4 } : {}),
+    }),
   updatePost: (id: number, data: { title?: string; description?: string }) =>
     put(`/posts/update/${id}`, data),
   deletePost: (id: number) => del(`/posts/delete/${id}`),
+  joinGroup: (postId: number) => post(`/posts/${postId}/join`, {}),
+  leaveGroup: (postId: number) => post(`/posts/${postId}/leave`, {}),
+  acceptMember: (postId: number, accountId: number) =>
+    post(`/posts/${postId}/accept/${accountId}`, {}),
+  removeMember: (postId: number, accountId: number) => del(`/posts/${postId}/remove/${accountId}`),
 
   // Skills
   getUserSkills: () => get("/accounts/skills"),
@@ -90,6 +115,6 @@ export const endpoints = {
   logout: () => post("/accounts/logout", {}),
 
   // Admin
-  getUsers: () => get("/admin/users"),
+  getUsers: () => get<{ users: AdminUser[] }>("/admin/users"),
   makeAdmin: (id: number) => put(`/admin/users/${id}/make-admin`, {}),
 };

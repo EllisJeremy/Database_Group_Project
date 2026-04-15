@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { api } from "../networkUtils";
+import { endpoints } from "../networkUtils";
 
 export interface Class {
   id: number;
@@ -27,7 +27,7 @@ export const useClassesStore = create<ClassesState>((set, get) => ({
   fetchClasses: async () => {
     set({ loading: true });
     try {
-      const data = await api.get<{ classes: Class[] }>("classes");
+      const data = await endpoints.getClasses() as { classes: Class[] };
       set({ classes: data.classes });
     } catch (e) {
       console.error("Failed to fetch classes", e);
@@ -37,17 +37,17 @@ export const useClassesStore = create<ClassesState>((set, get) => ({
   },
 
   createClass: async (name, section) => {
-    await api.post("classes/add", { name, section });
+    await endpoints.createClass(name, section);
     await get().fetchClasses();
   },
 
   updateClass: async (id, data) => {
-    await api.put(`classes/update/${id}`, data);
+    await endpoints.updateClass(id, data);
     await get().fetchClasses();
   },
 
   deleteClass: async (id) => {
-    await api.delete(`classes/delete/${id}`);
+    await endpoints.deleteClass(id);
     await get().fetchClasses();
   },
 }));
