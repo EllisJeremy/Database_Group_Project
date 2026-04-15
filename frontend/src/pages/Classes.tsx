@@ -43,8 +43,8 @@ export default function Classes() {
       setName("");
       setSection("");
       setShowCreate(false);
-    } catch (e: any) {
-      alert(e.message || "Failed to create class");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to create class");
     }
   };
 
@@ -55,8 +55,8 @@ export default function Classes() {
       setEditingClass(null);
       setName("");
       setSection("");
-    } catch (e: any) {
-      alert(e.message || "Failed to update class");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to update class");
     }
   };
 

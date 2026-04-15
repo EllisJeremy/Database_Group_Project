@@ -21,8 +21,8 @@ export default function Admin() {
     try {
       await endpoints.makeAdmin(userId);
       setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_admin: true } : u)));
-    } catch (e: any) {
-      alert(e.message || "Failed to promote user");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to promote user");
     } finally {
       setPromoting(null);
     }

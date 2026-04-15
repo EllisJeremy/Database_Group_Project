@@ -74,8 +74,8 @@ export default function ClassDetail() {
       setGroupName("");
       setMaxMembers("4");
       setShowCreate(false);
-    } catch (e: any) {
-      alert(e.message || "Failed to create post");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to create post");
     }
   };
 
@@ -87,8 +87,8 @@ export default function ClassDetail() {
       setTitle("");
       setDescription("");
       await fetchPosts(classId);
-    } catch (e: any) {
-      alert(e.message || "Failed to update post");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to update post");
     }
   };
 
@@ -107,8 +107,8 @@ export default function ClassDetail() {
     try {
       if (action === "join") await joinGroup(postId);
       else await leaveGroup(postId);
-    } catch (e: any) {
-      alert(e.message || `Failed to ${action} group`);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : `Failed to ${action} group`);
     }
   };
 
