@@ -15,6 +15,7 @@ interface SkillsState {
   fetchUserSkills: () => Promise<void>;
   addSkills: (skillIds: number[]) => Promise<void>;
   removeSkills: (skillIds: number[]) => Promise<void>;
+  createSkill: (name: string, type: string) => Promise<void>;
 }
 
 export const useSkillsStore = create<SkillsState>((set, get) => ({
@@ -24,7 +25,7 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
 
   fetchAllSkills: async () => {
     try {
-      const data = await endpoints.getAllSkills() as { skills: Skill[] };
+      const data = (await endpoints.getAllSkills()) as { skills: Skill[] };
       set({ allSkills: data.skills });
     } catch (e) {
       console.error("Failed to fetch skills", e);
@@ -34,7 +35,7 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
   fetchUserSkills: async () => {
     set({ loading: true });
     try {
-      const data = await endpoints.getUserSkills() as { skills: Skill[] };
+      const data = (await endpoints.getUserSkills()) as { skills: Skill[] };
       set({ userSkills: data.skills });
     } catch (e) {
       console.error("Failed to fetch user skills", e);
@@ -51,5 +52,10 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
   removeSkills: async (skillIds) => {
     await endpoints.removeUserSkills(skillIds);
     await get().fetchUserSkills();
+  },
+
+  createSkill: async (name, type) => {
+    await endpoints.createSkill(name, type);
+    await get().fetchAllSkills();
   },
 }));

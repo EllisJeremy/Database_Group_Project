@@ -110,6 +110,7 @@ export const endpoints = {
   getAllSkills: () => get("/skills"),
   addUserSkills: (skillIds: number[]) => post("/accounts/skills/add", { skillIds }),
   removeUserSkills: (skillIds: number[]) => post("/accounts/skills/delete", { skillIds }),
+  createSkill: (name: string, type: string) => post("/skills/add", { name, type }),
 
   // Logout
   logout: () => post("/accounts/logout", {}),
