@@ -14,6 +14,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../state/useAuthStore";
+import { endpoints } from "../networkUtils";
 
 type Tab = "login" | "signup" | "forgot";
 
@@ -59,7 +60,10 @@ export default function Account() {
 
       {tab === "forgot" ? (
         <Paper withBorder shadow="md" p={30} radius="md">
-          <form onSubmit={forgotForm.onSubmit((values) => console.log(values))}>
+          <form onSubmit={forgotForm.onSubmit(async (values) => {
+            const result = await endpoints.forgotPassword(values.email);
+            if (result.previewUrl) window.open(result.previewUrl, "_blank");
+          })}>
             <Stack>
               <TextInput
                 label="Email"

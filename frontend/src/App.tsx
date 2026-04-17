@@ -8,6 +8,7 @@ import Classes from "./pages/Classes";
 import ClassDetail from "./pages/ClassDetail";
 import Skills from "./pages/Skills";
 import Admin from "./pages/Admin";
+import ResetPassword from "./pages/ResetPassword";
 import { useAuthStore } from "./state/useAuthStore";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,7 @@ export default function App() {
       <Router>
         <Routes>
           <Route path="/account" element={<Account />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             element={
               <RequireAuth>

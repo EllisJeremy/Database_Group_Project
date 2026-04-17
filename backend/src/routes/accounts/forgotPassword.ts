@@ -27,14 +27,14 @@ router.post("/", async (req: Request, res: Response) => {
     const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
     const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
 
-    await sendEmail(
+    const { previewUrl } = await sendEmail(
       email,
       "Reset your password",
       `Click the link to reset your password: ${resetUrl}\n\nThis link expires in 1 hour.`,
       `<p>Click <a href="${resetUrl}">here</a> to reset your password.</p><p>This link expires in 1 hour.</p>`,
     );
 
-    res.json({ success: true });
+    res.json({ success: true, previewUrl });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: "Internal server error" });

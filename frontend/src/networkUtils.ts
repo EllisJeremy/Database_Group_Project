@@ -112,6 +112,12 @@ export const endpoints = {
   removeUserSkills: (skillIds: number[]) => post("/accounts/skills/delete", { skillIds }),
   createSkill: (name: string, type: string) => post("/skills/add", { name, type }),
 
+  // Password reset
+  forgotPassword: (email: string) =>
+    post<{ success: boolean; previewUrl?: string }>("/accounts/forgot-password", { email }),
+  resetPassword: (token: string, password: string) =>
+    post<{ success: boolean }>("/accounts/reset-password", { token, password }),
+
   // Logout
   logout: () => post("/accounts/logout", {}),
 
