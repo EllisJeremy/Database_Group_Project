@@ -39,7 +39,7 @@ CREATE TABLE classes (
 CREATE TABLE groups (
     id SERIAL PRIMARY KEY,
     class_id INTEGER NOT NULL REFERENCES classes (id) ON DELETE CASCADE,
-    group_name VARCHAR(100) NOT NULL,
+    group_name TEXT NOT NULL,
     max_members INTEGER NOT NULL CHECK (max_members > 0),
     created_by INTEGER NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
