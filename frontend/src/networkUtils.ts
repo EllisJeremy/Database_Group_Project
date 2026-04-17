@@ -117,4 +117,5 @@ export const endpoints = {
   // Admin
   getUsers: () => get<{ users: AdminUser[] }>("/admin/users"),
   makeAdmin: (id: number) => put(`/admin/users/${id}/make-admin`, {}),
+  deleteUser: (id: number) => del(`/admin/users/${id}`),
 };

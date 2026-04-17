@@ -7,6 +7,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [promoting, setPromoting] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     endpoints
@@ -15,6 +16,19 @@ export default function Admin() {
       .catch((e) => setError(e.message ?? "Failed to load users"))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDeleteUser = async (userId: number, userName: string) => {
+    if (!confirm(`Are you sure you want to delete ${userName}'s account? This cannot be undone.`)) return;
+    setDeleting(userId);
+    try {
+      await endpoints.deleteUser(userId);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to delete user");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   const handleMakeAdmin = async (userId: number) => {
     setPromoting(userId);
@@ -143,28 +157,48 @@ export default function Admin() {
                     {new Date(u.created_at).toLocaleDateString()}
                   </td>
                   <td style={{ padding: "16px 20px" }}>
-                    {!u.is_admin && (
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {!u.is_admin && (
+                        <button
+                          onClick={() => handleMakeAdmin(u.id)}
+                          disabled={promoting === u.id}
+                          style={{
+                            padding: "6px 14px",
+                            background:
+                              promoting === u.id
+                                ? "#f4f4f5"
+                                : "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                            border: "none",
+                            borderRadius: 8,
+                            cursor: promoting === u.id ? "default" : "pointer",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: promoting === u.id ? "#a1a1aa" : "white",
+                            fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+                          }}
+                        >
+                          {promoting === u.id ? "Promoting..." : "Make Admin"}
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleMakeAdmin(u.id)}
-                        disabled={promoting === u.id}
+                        onClick={() => handleDeleteUser(u.id, u.name)}
+                        disabled={deleting === u.id}
                         style={{
                           padding: "6px 14px",
-                          background:
-                            promoting === u.id
-                              ? "#f4f4f5"
-                              : "linear-gradient(135deg, #4f46e5, #7c3aed)",
-                          border: "none",
+                          background: deleting === u.id ? "#f4f4f5" : "rgba(220,38,38,0.08)",
+                          border: "1px solid",
+                          borderColor: deleting === u.id ? "transparent" : "rgba(220,38,38,0.2)",
                           borderRadius: 8,
-                          cursor: promoting === u.id ? "default" : "pointer",
+                          cursor: deleting === u.id ? "default" : "pointer",
                           fontSize: 12,
                           fontWeight: 600,
-                          color: promoting === u.id ? "#a1a1aa" : "white",
+                          color: deleting === u.id ? "#a1a1aa" : "#dc2626",
                           fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
                         }}
                       >
-                        {promoting === u.id ? "Promoting..." : "Make Admin"}
+                        {deleting === u.id ? "Deleting..." : "Delete"}
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}

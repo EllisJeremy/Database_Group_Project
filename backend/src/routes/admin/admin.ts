@@ -47,4 +47,30 @@ router.put("/users/:id/make-admin", async (req: Request, res: Response) => {
   }
 });
 
+router.delete("/users/:id", async (req: Request, res: Response) => {
+  const targetId = parseInt(req.params.id);
+
+  if (isNaN(targetId)) {
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
+  }
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM accounts WHERE id = $1 RETURNING id`,
+      [targetId],
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
 export default router;
