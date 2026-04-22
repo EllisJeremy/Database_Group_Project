@@ -1,0 +1,17 @@
+Jeremy Ellis - I built and architected the full application from scratch, including the database schema design, 
+all backend API routes, and part of the React frontend. On the backend, I implemented user authentication using 
+JWT and bcrypt, role-based access control, password reset via email tokens, and all core features, including 
+classes, posts, groups, and skill management. I containerized the backend stack using Docker Compose, configured 
+the database to auto-initialize with schema and seed data on startup, and set up the development environment 
+with environment variable validation and seeding for the admin account. I also created the entirety of this Report. 
+
+
+Mugilan Murugavel - My role was most of the front-end work. I designed mockups in Paper (Kind of like Figma) for 
+each screen, from creating a post to viewing and commenting on Teammate posts. I then wired this into the code 
+in with the backend. 
+
+Isaac Han - My role was to be a filler, helping out with tedious work as asked. I designed diagrams and wrote
+documentation.
+
+Nitant Rai: I contributed to the documentation and ER diagram. I worked on the report by drafting and organizing 
+sections and overall documentation.
