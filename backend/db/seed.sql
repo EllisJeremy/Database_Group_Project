@@ -11,7 +11,7 @@ VALUES
     'alice'
 ),
 (
-    'bob@icloud.com',
+    'bob@gmail.com',
     '$2b$10$focWf..Yp0/W9nI/dE.HYeNr3Q5l9tfuNqVfzfeRDZQdO5fe48BjC',
     'bob'
 ),
@@ -92,6 +92,10 @@ INSERT INTO account_skills (account_id, skill_id) VALUES
 (1, 14), -- jeremy: react
 (2, 2),  -- alice: java
 (2, 32), -- alice: spring
+(2, 8), -- alice go
+(2, 1), --alice py
+(2, 22), --alice spring
+(2, 6), --alice js
 (3, 7),  -- bob: typescript
 (3, 18), -- bob: nestjs
 (4, 1),  -- carol: python
